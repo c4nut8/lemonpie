@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_login import LoginManager
 from datetime import timedelta
@@ -15,7 +16,7 @@ def create_app():
         static_url_path="/static"
     )
 
-    app.config["SECRET_KEY"] = "cambia_esta_clave_por_una_mas_segura"
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "cambia_esta_clave_por_una_mas_segura")
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -40,4 +41,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=False)
