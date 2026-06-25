@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Calidad de datos - SIS 2025{% endblock %}
+
+{% block content %}
+
+<div class="page-header mb-3">
+    <div class="page-pretitle">Control y consistencia</div>
+    <h2 class="page-title">Calidad de datos</h2>
+</div>
+
+<div class="alert alert-warning">
+    <strong>Control de calidad:</strong> esta sección permite identificar registros incompletos o inconsistentes que pueden afectar el análisis de pacientes, atenciones y valorización SIS.
+</div>
+
+<div class="row row-deck row-cards mb-4">
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Registros sin DNI</div>
+                <div class="h1 text-danger" id="registros_sin_dni">...</div>
+                <div class="text-muted">Identificación incompleta</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Sin fecha nacimiento</div>
+                <div class="h1 text-danger" id="registros_sin_fecha_nacimiento">...</div>
+                <div class="text-muted">Dato demográfico faltante</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Registros sin sexo</div>
+                <div class="h1 text-danger" id="registros_sin_sexo">...</div>
+                <div class="text-muted">Clasificación incompleta</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Registros sin FUA</div>
+                <div class="h1 text-danger" id="registros_sin_fua">...</div>
+                <div class="text-muted">Llave de atención faltante</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row row-cards">
+
+    <div class="col-lg-8">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Problemas de calidad detectados</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartCalidadDatos"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Interpretación</h3>
+            </div>
+            <div class="card-body">
+                <p>
+                    Los registros incompletos representan posibles limitaciones para el análisis de pacientes únicos,
+                    segmentación demográfica y cruce de valorización SIS.
+                </p>
+
+                <p>
+                    El campo FUA es especialmente importante porque se utiliza como llave para relacionar las atenciones
+                    con la valorización económica.
+                </p>
+
+                <span class="badge bg-warning text-dark">
+                    Requiere revisión y depuración continua
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row row-cards mt-4">
+
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Resumen técnico de calidad de datos</h3>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Problema identificado</th>
+                            <th>Impacto en el análisis</th>
+                            <th class="text-end">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCalidadDatos">
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/calidad.js') }}"></script>
+{% endblock %}

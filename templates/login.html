@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - BI SIS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body class="d-flex flex-column">
+<div class="page page-center">
+
+    <div class="container container-tight py-4">
+
+        <div class="text-center mb-4">
+            <h1 class="text-primary">BI - SIS 2025</h1>
+            <p class="text-muted">Hospital San Juan de Dios de Pisco</p>
+        </div>
+
+        <form class="card card-md" method="POST" autocomplete="off">
+            <div class="card-body">
+
+                <h2 class="card-title text-center mb-4">
+                    Acceso al sistema
+                </h2>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="mb-3">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" name="username" class="form-control" placeholder="Ingrese su usuario" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" name="password" class="form-control" placeholder="Ingrese su contraseña" required>
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Iniciar sesión
+                    </button>
+                </div>
+
+            </div>
+        </form>
+
+        <div class="text-center text-muted mt-3">
+            Acceso restringido a personal autorizado.
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

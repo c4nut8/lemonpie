@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dashboard BI - SIS 2025{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tabler CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<div class="page">
+
+    <!-- Sidebar -->
+    <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+
+            <h1 class="navbar-brand navbar-brand-autodark">
+                <span class="fw-bold">BI - SIS</span>
+            </h1>
+            <div class="text-white-50 small text-center mb-3">
+                Hospital SJDD Pisco
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="text-white-50 small text-center mb-3">
+                Usuario: {{ current_user.username }} | Rol: {{ current_user.rol }}
+            </div>
+            {% endif %}
+
+            <div class="collapse navbar-collapse show" id="sidebar-menu">
+                <ul class="navbar-nav pt-lg-3">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">
+                            <span class="nav-link-icon"><i class="ti ti-dashboard"></i></span>
+                            <span class="nav-link-title">Resumen</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.atenciones') }}">
+                            <span class="nav-link-icon"><i class="ti ti-activity"></i></span>
+                            <span class="nav-link-title">Atenciones</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.valorizacion') }}">
+                            <span class="nav-link-icon"><i class="ti ti-cash"></i></span>
+                            <span class="nav-link-title">Valorización SIS</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.calidad') }}">
+                            <span class="nav-link-icon"><i class="ti ti-shield-check"></i></span>
+                            <span class="nav-link-title">Calidad de datos</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.etl') }}">
+                            <span class="nav-link-icon"><i class="ti ti-database-import"></i></span>
+                            <span class="nav-link-title">ETL</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-3">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                            <span class="nav-link-icon">
+                                <i class="ti ti-logout"></i>
+                            </span>
+                            <span class="nav-link-title">Cerrar sesión</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Contenido -->
+    <div class="page-wrapper">
+
+        <header class="navbar navbar-expand-md navbar-light bg-white d-print-none border-bottom">
+            <div class="container-xl">
+                <div>
+                    <h2 class="navbar-brand mb-0">Dashboard BI - SIS 2025</h2>
+                    <div class="text-muted small">
+                        Hospital San Juan de Dios de Pisco - Área SIS
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-body">
+            <div class="container-xl">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Tabler JS -->
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

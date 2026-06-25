@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard BI - SIS 2025</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tabler CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+    <!-- Tu CSS personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<div class="page">
+
+    <!-- Sidebar -->
+    <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <h1 class="navbar-brand navbar-brand-autodark">
+                <span class="fw-bold">BI - SIS</span>
+            </h1>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="sidebar-menu">
+                <ul class="navbar-nav pt-lg-3">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#resumen">
+                            <span class="nav-link-icon">
+                                <i class="ti ti-dashboard"></i>
+                            </span>
+                            <span class="nav-link-title">Resumen</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#atenciones">
+                            <span class="nav-link-icon">
+                                <i class="ti ti-activity"></i>
+                            </span>
+                            <span class="nav-link-title">Atenciones</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#valorizacion">
+                            <span class="nav-link-icon">
+                                <i class="ti ti-currency-solana"></i>
+                            </span>
+                            <span class="nav-link-title">Valorización SIS</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#calidad">
+                            <span class="nav-link-icon">
+                                <i class="ti ti-shield-check"></i>
+                            </span>
+                            <span class="nav-link-title">Calidad de datos</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#etl">
+                            <span class="nav-link-icon">
+                                <i class="ti ti-database-import"></i>
+                            </span>
+                            <span class="nav-link-title">ETL</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Contenido -->
+    <div class="page-wrapper">
+
+        <!-- Header -->
+        <header class="navbar navbar-expand-md navbar-light bg-white d-print-none border-bottom">
+            <div class="container-xl">
+                <div>
+                    <h2 class="navbar-brand mb-0">Dashboard BI - SIS 2025</h2>
+                    <div class="text-muted small">Hospital San Juan de Dios de Pisco - Área SIS</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-body">
+            <div class="container-xl">
+
+                <!-- Resumen -->
+                <section id="resumen">
+                    <div class="page-header mb-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="page-pretitle">Indicadores principales</div>
+                                <h2 class="page-title">Resumen general</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row row-deck row-cards">
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">Total de atenciones</div>
+                                    <div class="h1 text-primary" id="total_atenciones">...</div>
+                                    <div class="text-muted">FUA registrados</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">Pacientes únicos</div>
+                                    <div class="h1 text-info" id="pacientes_unicos">...</div>
+                                    <div class="text-muted">DNI únicos</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">Atenciones valorizadas</div>
+                                    <div class="h1 text-success" id="atenciones_valorizadas">...</div>
+                                    <div class="text-muted">Con cruce SIS</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">Sin valorización</div>
+                                    <div class="h1 text-danger" id="atenciones_sin_valorizacion">...</div>
+                                    <div class="text-muted">Sin registro cruzado</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">% valorización</div>
+                                    <div class="h1 text-purple" id="porcentaje_valorizacion">...</div>
+                                    <div class="progress progress-sm mt-2">
+                                        <div id="barra_porcentaje_valorizacion" class="progress-bar bg-purple" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">Valor total SIS</div>
+                                    <div class="h1 text-success" id="valor_total_sis">...</div>
+                                    <div class="text-muted">Monto valorizado</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card kpi-card-tabler">
+                                <div class="card-body">
+                                    <div class="subheader">Promedio por atención</div>
+                                    <div class="h1 text-warning" id="valor_promedio_por_atencion">...</div>
+                                    <div class="text-muted">Valor promedio por FUA</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Atenciones -->
+                <section id="atenciones" class="mt-5">
+                    <div class="page-header mb-3">
+                        <div class="page-pretitle">Producción asistencial</div>
+                        <h2 class="page-title">Análisis de atenciones</h2>
+                    </div>
+
+                    <div class="row row-cards">
+                        <div class="col-lg-6">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Atenciones por mes</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartAtencionesMes"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Top establecimientos</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartEstablecimientos"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Top servicios</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartServicios"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Distribución por sexo</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartSexo"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Valorización -->
+                <section id="valorizacion" class="mt-5">
+                    <div class="page-header mb-3">
+                        <div class="page-pretitle">Análisis económico</div>
+                        <h2 class="page-title">Valorización económica SIS</h2>
+                    </div>
+
+                    <div class="row row-cards">
+                        <div class="col-lg-8">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Valorización SIS por mes</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartValorizacionMes"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Estado de valorización</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartEstadoValorizacion"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Observados vs no observados</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartObservados"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card chart-card-tabler">
+                                <div class="card-header">
+                                    <h3 class="card-title">Componentes de valorización</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="chartComponentesValorizacion"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Calidad -->
+                <section id="calidad" class="mt-5">
+                    <div class="page-header mb-3">
+                        <div class="page-pretitle">Control y consistencia</div>
+                        <h2 class="page-title">Calidad de datos</h2>
+                    </div>
+
+                    <div class="row row-cards">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="subheader">Sin DNI</div>
+                                    <div class="h2 text-danger" id="registros_sin_dni">...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="subheader">Sin fecha nacimiento</div>
+                                    <div class="h2 text-danger" id="registros_sin_fecha_nacimiento">...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="subheader">Sin sexo</div>
+                                    <div class="h2 text-danger" id="registros_sin_sexo">...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="subheader">Sin FUA</div>
+                                    <div class="h2 text-danger" id="registros_sin_fua">...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tablas de detalle -->
+<section id="tablas" class="mt-5">
+    <div class="page-header mb-3">
+        <div class="page-pretitle">Detalle analítico</div>
+        <h2 class="page-title">Rankings principales</h2>
+    </div>
+
+    <div class="row row-cards">
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Ranking de establecimientos</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Establecimiento</th>
+                                <th class="text-end">Atenciones</th>
+                                <th class="text-end">Valor SIS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEstablecimientos">
+                            <tr>
+                                <td colspan="4" class="text-muted text-center">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Ranking de servicios</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Servicio</th>
+                                <th class="text-end">Atenciones</th>
+                                <th class="text-end">Valor SIS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaServicios">
+                            <tr>
+                                <td colspan="4" class="text-muted text-center">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<li class="nav-item">
+    <a class="nav-link" href="#tablas">
+        <span class="nav-link-icon">
+            <i class="ti ti-table"></i>
+        </span>
+        <span class="nav-link-title">Rankings</span>
+    </a>
+</li>
+
+                <!-- ETL -->
+                <section id="etl" class="mt-5 mb-5">
+                    <div class="page-header mb-3">
+                        <div class="page-pretitle">Automatización futura</div>
+                        <h2 class="page-title">Módulo ETL</h2>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>ETL automatizado:</strong> módulo proyectado para extraer archivos SIS, transformar la información y cargarla automáticamente en PostgreSQL.
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabler JS -->
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+
+<!-- Tu JS -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

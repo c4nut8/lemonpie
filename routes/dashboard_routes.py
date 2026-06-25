@@ -1,0 +1,137 @@
+from flask import Blueprint, render_template, jsonify
+from flask_login import login_required, current_user
+from services import kpi_service
+
+dashboard_bp = Blueprint("dashboard", __name__)
+
+
+# =========================
+# PÁGINAS DEL SISTEMA
+# =========================
+
+@dashboard_bp.route("/")
+@dashboard_bp.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
+
+@dashboard_bp.route("/atenciones")
+def atenciones():
+    return render_template("atenciones.html")
+
+
+@dashboard_bp.route("/valorizacion")
+@login_required
+def valorizacion():
+    return render_template("valorizacion.html")
+
+
+@dashboard_bp.route("/calidad")
+@login_required
+def calidad():
+    return render_template("calidad.html")
+
+
+@dashboard_bp.route("/etl")
+@login_required
+def etl():
+    if current_user.rol != "admin":
+        return render_template("sin_permiso.html"), 403
+
+    return render_template("etl.html")
+
+
+# =========================
+# APIS
+# =========================
+
+@dashboard_bp.route("/api/resumen")
+def api_resumen():
+    try:
+        data = kpi_service.obtener_resumen_general()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/atenciones-mes")
+def api_atenciones_mes():
+    try:
+        data = kpi_service.obtener_atenciones_mes()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/valorizacion-mes")
+def api_valorizacion_mes():
+    try:
+        data = kpi_service.obtener_valorizacion_mes()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/establecimientos")
+def api_establecimientos():
+    try:
+        data = kpi_service.obtener_establecimientos()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/servicios")
+def api_servicios():
+    try:
+        data = kpi_service.obtener_servicios()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/sexo")
+def api_sexo():
+    try:
+        data = kpi_service.obtener_sexo()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/observados")
+def api_observados():
+    try:
+        data = kpi_service.obtener_observados()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/estado-valorizacion")
+def api_estado_valorizacion():
+    try:
+        data = kpi_service.obtener_estado_valorizacion()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/calidad")
+def api_calidad():
+    try:
+        data = kpi_service.obtener_calidad_datos()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/componentes-valorizacion")
+def api_componentes_valorizacion():
+    try:
+        data = kpi_service.obtener_componentes_valorizacion()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    

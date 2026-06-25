@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}ETL - SIS 2025{% endblock %}
+
+{% block content %}
+
+<div class="page-header mb-3">
+    <div class="page-pretitle">Automatización futura</div>
+    <h2 class="page-title">Módulo ETL</h2>
+</div>
+
+<div class="alert alert-info">
+    <strong>Proceso ETL:</strong> este módulo está proyectado para automatizar la extracción, transformación y carga de archivos SIS hacia PostgreSQL.
+</div>
+
+<div class="row row-deck row-cards mb-4">
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Estado actual</div>
+                <div class="h2 text-warning">En diseño</div>
+                <div class="text-muted">Automatización pendiente</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Tipo de carga</div>
+                <div class="h2 text-primary">Manual</div>
+                <div class="text-muted">Carga inicial validada</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Fuente de datos</div>
+                <div class="h2 text-info">Excel / CSV</div>
+                <div class="text-muted">Reportes SIS</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Destino</div>
+                <div class="h2 text-success">PostgreSQL</div>
+                <div class="text-muted">Data Warehouse BI</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row row-cards">
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Flujo del proceso ETL</h3>
+            </div>
+
+            <div class="card-body">
+
+                <div class="steps steps-counter steps-blue">
+                    <a href="#" class="step-item active">
+                        Extracción
+                    </a>
+                    <a href="#" class="step-item active">
+                        Transformación
+                    </a>
+                    <a href="#" class="step-item active">
+                        Carga
+                    </a>
+                    <a href="#" class="step-item">
+                        Automatización
+                    </a>
+                </div>
+
+                <div class="mt-4">
+                    <h4>Descripción del flujo</h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Etapa</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Extracción</td>
+                                    <td>Lectura de archivos mensuales de atenciones SIS y valorización.</td>
+                                    <td><span class="badge bg-success">Realizado</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Transformación</td>
+                                    <td>Limpieza de columnas, normalización de fechas, DNI, FUA y campos numéricos.</td>
+                                    <td><span class="badge bg-success">Realizado</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Carga</td>
+                                    <td>Inserción de datos en tablas staging y construcción de vistas KPI en PostgreSQL.</td>
+                                    <td><span class="badge bg-success">Realizado</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Automatización</td>
+                                    <td>Ejecución futura mediante scripts Python para evitar cargas manuales.</td>
+                                    <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">Ejecución ETL</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    En esta etapa el proceso ETL aún no se ejecuta desde la interfaz web. La carga fue realizada de manera controlada para validar la consistencia del modelo.
+                </p>
+
+                <button class="btn btn-primary w-100" disabled>
+                    Ejecutar ETL
+                </button>
+
+                <div class="text-muted mt-2 small">
+                    Funcionalidad proyectada para una siguiente versión.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Arquitectura actual</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled space-y">
+                    <li>
+                        <strong>Backend:</strong> Flask
+                    </li>
+                    <li>
+                        <strong>Base de datos:</strong> PostgreSQL
+                    </li>
+                    <li>
+                        <strong>Frontend:</strong> Tabler + Chart.js
+                    </li>
+                    <li>
+                        <strong>Modelo:</strong> Staging + Data Warehouse
+                    </li>
+                    <li>
+                        <strong>Indicadores:</strong> vistas KPI en esquema DW
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row row-cards mt-4 mb-4">
+
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Justificación técnica</h3>
+            </div>
+            <div class="card-body">
+                <p>
+                    El módulo ETL permite proyectar la automatización del procesamiento de datos SIS, reduciendo la dependencia de procesos manuales y facilitando la actualización periódica de los indicadores del dashboard.
+                </p>
+
+                <p>
+                    La arquitectura planteada considera una zona de carga inicial en el esquema <strong>stg</strong>, seguida de un modelo analítico en el esquema <strong>dw</strong>, donde se generan las vistas necesarias para alimentar el dashboard web.
+                </p>
+
+                <div class="alert alert-secondary mb-0">
+                    Este módulo respalda la escalabilidad futura del sistema BI, permitiendo integrar nuevos periodos, establecimientos y fuentes de información.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

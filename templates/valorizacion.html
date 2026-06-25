@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Valorización SIS - 2025{% endblock %}
+
+{% block content %}
+
+<div class="page-header mb-3">
+    <div class="page-pretitle">Análisis económico</div>
+    <h2 class="page-title">Valorización económica SIS</h2>
+</div>
+
+<div class="row row-deck row-cards mb-4">
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Valor total SIS</div>
+                <div class="h1 text-success" id="valor_total_sis">...</div>
+                <div class="text-muted">Monto total valorizado</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Promedio por atención</div>
+                <div class="h1 text-warning" id="valor_promedio_por_atencion">...</div>
+                <div class="text-muted">Valor promedio por FUA</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Atenciones valorizadas</div>
+                <div class="h1 text-primary" id="atenciones_valorizadas">...</div>
+                <div class="text-muted">Con registro valorizado</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card kpi-card-tabler">
+            <div class="card-body">
+                <div class="subheader">Sin valorización</div>
+                <div class="h1 text-danger" id="atenciones_sin_valorizacion">...</div>
+                <div class="text-muted">Pendientes de cruce</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row row-cards">
+
+    <div class="col-lg-8">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Valorización SIS por mes</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartValorizacionMes"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Estado de valorización</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartEstadoValorizacion"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Observados vs no observados</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartObservados"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Componentes de valorización</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartComponentesValorizacion"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row row-cards mt-4">
+
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Detalle de componentes SIS</h3>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th class="text-end">Monto SIS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaComponentesValorizacion">
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/valorizacion.js') }}"></script>
+{% endblock %}

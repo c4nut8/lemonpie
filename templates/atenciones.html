@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Atenciones - SIS 2025{% endblock %}
+
+{% block content %}
+
+<div class="page-header mb-3">
+    <div class="page-pretitle">Producción asistencial</div>
+    <h2 class="page-title">Análisis de atenciones</h2>
+</div>
+
+<div class="row row-cards">
+
+    <div class="col-lg-6">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Atenciones por mes</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartAtencionesMes"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Distribución por sexo</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartSexo"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Top establecimientos</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartEstablecimientos"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Top servicios</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartServicios"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row row-cards mt-4">
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Ranking de establecimientos</h3>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Establecimiento</th>
+                            <th class="text-end">Atenciones</th>
+                            <th class="text-end">Valor SIS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaEstablecimientos">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Ranking de servicios</h3>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Servicio</th>
+                            <th class="text-end">Atenciones</th>
+                            <th class="text-end">Valor SIS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaServicios">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/atenciones.js') }}"></script>
+{% endblock %}
