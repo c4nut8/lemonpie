@@ -1,8 +1,7 @@
 import os
-from datetime import timedelta
-
 from flask import Flask
 from flask_login import LoginManager
+from datetime import timedelta
 
 from routes.dashboard_routes import dashboard_bp
 from auth.auth_routes import auth_bp
@@ -17,16 +16,13 @@ def create_app():
         static_url_path="/static"
     )
 
-    secret_key = os.getenv("SECRET_KEY")
-
-    if not secret_key:
-        raise RuntimeError("Falta configurar la variable de entorno SECRET_KEY")
-
-    app.config["SECRET_KEY"] = secret_key
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "clave_temporal_solo_local")
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["SESSION_COOKIE_SECURE"] = True
+
+    # En Render usa HTTPS, en local no bloquea la sesión
+    app.config["SESSION_COOKIE_SECURE"] = os.getenv("RENDER") == "true"
 
     login_manager = LoginManager()
     login_manager.init_app(app)
