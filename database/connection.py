@@ -14,26 +14,34 @@ def get_connection():
 
 
 def fetch_one(query, params=None):
-    conn = get_connection()
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-    cursor.execute(query, params)
-    result = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    return result
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute(query, params)
+        return cursor.fetchone()
+    except psycopg2.Error:
+        return None
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
 
 
 def fetch_all(query, params=None):
-    conn = get_connection()
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-    cursor.execute(query, params)
-    result = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return result
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute(query, params)
+        return cursor.fetchall()
+    except psycopg2.Error:
+        return []
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()

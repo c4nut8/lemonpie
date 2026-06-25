@@ -1,3 +1,4 @@
+import psycopg2
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
@@ -17,7 +18,7 @@ def login():
         try:
             get_connection().close()
             usuario = Usuario.obtener_por_username(username)
-        except Exception:
+        except (psycopg2.Error, Exception):
             flash("No se pudo conectar a la base de datos. Intente nuevamente más tarde.", "danger")
             return render_template("login.html")
 
