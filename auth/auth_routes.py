@@ -16,7 +16,7 @@ def login():
         password = request.form.get("password")
 
         try:
-            get_connection().close()
+            Usuario.ensure_default_user()
             usuario = Usuario.obtener_por_username(username)
         except (psycopg2.Error, Exception):
             flash("No se pudo conectar a la base de datos. Intente nuevamente más tarde.", "danger")
