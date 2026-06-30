@@ -94,3 +94,47 @@ def obtener_componentes_valorizacion():
         "total_insumos": data.get("total_insumos", 0),
         "total_procedimientos": data.get("total_procedimientos", 0),
     }
+
+
+def obtener_lista_servicios():
+    query = """
+    SELECT DISTINCT
+        COALESCE(NULLIF(TRIM(servicio), ''), 'NO ESPECIFICADO') AS servicio
+    FROM dw.fact_atenciones_2025
+    WHERE servicio IS NOT NULL
+    ORDER BY servicio;
+    """
+
+    return fetch_all(query)
+
+
+def obtener_atenciones_servicio_tiempo(servicio=None, granularidad="mes"):
+    if granularidad == "dia":
+        periodo_label = "TO_CHAR(fecha_atencion, 'YYYY-MM-DD')"
+        periodo_orden = "DATE_TRUNC('day', fecha_atencion)"
+
+    elif granularidad == "semana":
+        periodo_label = "TO_CHAR(fecha_atencion, 'IYYY') || '-S' || TO_CHAR(fecha_atencion, 'IW')"
+        periodo_orden = "DATE_TRUNC('week', fecha_atencion)"
+
+    else:
+        periodo_label = "TO_CHAR(fecha_atencion, 'YYYY-MM')"
+        periodo_orden = "DATE_TRUNC('month', fecha_atencion)"
+
+    query = f"""
+    SELECT
+        {periodo_label} AS periodo,
+        COUNT(*) AS total_atenciones
+    FROM dw.fact_atenciones_2025
+    WHERE fecha_atencion IS NOT NULL
+      AND (
+            %s = 'TODOS'
+            OR COALESCE(NULLIF(TRIM(servicio), ''), 'NO ESPECIFICADO') = %s
+          )
+    GROUP BY periodo, {periodo_orden}
+    ORDER BY {periodo_orden};
+    """
+
+    servicio_param = servicio if servicio else "TODOS"
+
+    return fetch_all(query, (servicio_param, servicio_param))   

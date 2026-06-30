@@ -163,8 +163,63 @@ async function cargarTablaServicios() {
     });
 }
 
+let chartServicioTiempo = null;
+
+async function cargarListaServicios() {
+    const data = await obtenerDatos("/api/lista-servicios");
+    const select = document.getElementById("filtroServicio");
+
+    data.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.servicio;
+        option.textContent = item.servicio;
+        select.appendChild(option);
+    });
+}
+
+async function crearGraficoServicioTiempo() {
+    const servicio = document.getElementById("filtroServicio").value;
+    const granularidad = document.getElementById("filtroGranularidad").value;
+
+    const url = `/api/atenciones-servicio-tiempo?servicio=${encodeURIComponent(servicio)}&granularidad=${granularidad}`;
+
+    const data = await obtenerDatos(url);
+
+    const ctx = document.getElementById("chartServicioTiempo");
+
+    if (chartServicioTiempo) {
+        chartServicioTiempo.destroy();
+    }
+
+    chartServicioTiempo = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: data.map(item => item.periodo),
+            datasets: [{
+                label: servicio === "TODOS" ? "Todos los servicios" : servicio,
+                data: data.map(item => item.total_atenciones),
+                borderColor: "#17365D",
+                backgroundColor: "#17365D",
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     try {
+        await cargarListaServicios();
+        await crearGraficoServicioTiempo();
+
+        document.getElementById("btnAplicarFiltros").addEventListener("click", async () => {
+            await crearGraficoServicioTiempo();
+        });
+
         await crearGraficoAtencionesMes();
         await crearGraficoSexo();
         await crearGraficoEstablecimientos();

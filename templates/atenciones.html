@@ -9,6 +9,52 @@
     <h2 class="page-title">Análisis de atenciones</h2>
 </div>
 
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Filtros de análisis</h3>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+                <label class="form-label">Servicio</label>
+                <select id="filtroServicio" class="form-select">
+                    <option value="TODOS">Todos los servicios</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Agrupar por</label>
+                <select id="filtroGranularidad" class="form-select">
+                    <option value="mes">Mes</option>
+                    <option value="semana">Semana</option>
+                    <option value="dia">Día</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button id="btnAplicarFiltros" class="btn btn-primary w-100">
+                    Aplicar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mb-4">
+    <div class="col-lg-12">
+        <div class="card chart-card-tabler">
+            <div class="card-header">
+                <h3 class="card-title">Atenciones por servicio según periodo</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chartServicioTiempo"></canvas>
+            </div>
+        </div>
+    </div>
+</div>      
 <div class="row row-cards">
 
     <div class="col-lg-6">

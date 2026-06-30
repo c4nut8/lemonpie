@@ -134,4 +134,30 @@ def api_componentes_valorizacion():
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+@dashboard_bp.route("/api/lista-servicios")
+@login_required
+def api_lista_servicios():
+    try:
+        data = kpi_service.obtener_lista_servicios()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@dashboard_bp.route("/api/atenciones-servicio-tiempo")
+@login_required
+def api_atenciones_servicio_tiempo():
+    try:
+        servicio = request.args.get("servicio", "TODOS")
+        granularidad = request.args.get("granularidad", "mes")
+
+        data = kpi_service.obtener_atenciones_servicio_tiempo(
+            servicio=servicio,
+            granularidad=granularidad
+        )
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
