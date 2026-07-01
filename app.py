@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request, jsonify, redirect, url_for
 from flask_login import LoginManager
 from datetime import timedelta
 
@@ -30,6 +30,13 @@ def create_app():
     login_manager.login_message = "Debes iniciar sesión para acceder al sistema."
     login_manager.login_message_category = "warning"
 
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        if request.path.startswith("/api/"):
+            return jsonify({"error": "Sesión expirada o usuario no autenticado."}), 401
+
+        return redirect(url_for("auth.login"))
+    
     @login_manager.user_loader
     def load_user(user_id):
         return Usuario.obtener_por_id(user_id)
