@@ -118,17 +118,19 @@ def obtener_atenciones_servicio_tiempo(
     fecha_inicio=None,
     fecha_fin=None
 ):
+    fecha_sql = "NULLIF(TRIM(fecha_atencion_date), '')::date"
+
     if granularidad == "dia":
-        periodo_label = "TO_CHAR(fecha_atencion_date::date, 'YYYY-MM-DD')"
-        periodo_orden = "DATE_TRUNC('day', fecha_atencion_date::date)"
+        periodo_label = f"TO_CHAR({fecha_sql}, 'YYYY-MM-DD')"
+        periodo_orden = f"DATE_TRUNC('day', {fecha_sql})"
 
     elif granularidad == "semana":
-        periodo_label = "TO_CHAR(fecha_atencion_date::date, 'IYYY') || '-S' || TO_CHAR(fecha_atencion_date::date, 'IW')"
-        periodo_orden = "DATE_TRUNC('week', fecha_atencion_date::date)"
+        periodo_label = f"TO_CHAR({fecha_sql}, 'IYYY') || '-S' || TO_CHAR({fecha_sql}, 'IW')"
+        periodo_orden = f"DATE_TRUNC('week', {fecha_sql})"
 
     else:
-        periodo_label = "TO_CHAR(fecha_atencion_date::date, 'YYYY-MM')"
-        periodo_orden = "DATE_TRUNC('month', fecha_atencion_date::date)"
+        periodo_label = f"TO_CHAR({fecha_sql}, 'YYYY-MM')"
+        periodo_orden = f"DATE_TRUNC('month', {fecha_sql})"
 
     query = f"""
     SELECT
@@ -138,8 +140,8 @@ def obtener_atenciones_servicio_tiempo(
     WHERE fecha_atencion_date IS NOT NULL
       AND TRIM(fecha_atencion_date) <> ''
       AND (%s = 'TODOS' OR TRIM(cod_servicio) = %s)
-      AND (%s IS NULL OR fecha_atencion_date::date >= %s::date)
-      AND (%s IS NULL OR fecha_atencion_date::date <= %s::date)
+      AND (%s IS NULL OR {fecha_sql} >= %s::date)
+      AND (%s IS NULL OR {fecha_sql} <= %s::date)
     GROUP BY periodo, {periodo_orden}
     ORDER BY {periodo_orden};
     """

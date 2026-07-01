@@ -151,10 +151,20 @@ def api_atenciones_servicio_tiempo():
     try:
         servicio = request.args.get("servicio", "TODOS")
         granularidad = request.args.get("granularidad", "mes")
+        fecha_inicio = request.args.get("fecha_inicio")
+        fecha_fin = request.args.get("fecha_fin")
+
+        if fecha_inicio == "":
+            fecha_inicio = None
+
+        if fecha_fin == "":
+            fecha_fin = None
 
         data = kpi_service.obtener_atenciones_servicio_tiempo(
             servicio=servicio,
-            granularidad=granularidad
+            granularidad=granularidad,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin
         )
 
         return jsonify(data)

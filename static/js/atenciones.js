@@ -236,23 +236,32 @@ async function crearGraficoServicioTiempo() {
     const fechaInicio = document.getElementById("fechaInicio").value;
     const fechaFin = document.getElementById("fechaFin").value;
 
-    let url = `/api/atenciones-servicio-tiempo?servicio=${encodeURIComponent(servicio)}&granularidad=${granularidad}`;
+    const params = new URLSearchParams();
+
+    params.append("servicio", servicio);
+    params.append("granularidad", granularidad);
 
     if (fechaInicio) {
-        url += `&fecha_inicio=${fechaInicio}`;
+        params.append("fecha_inicio", fechaInicio);
     }
 
     if (fechaFin) {
-        url += `&fecha_fin=${fechaFin}`;
+        params.append("fecha_fin", fechaFin);
     }
 
+    const url = `/api/atenciones-servicio-tiempo?${params.toString()}`;
+
+    console.log("URL filtro:", url);
+
     const data = await obtenerDatos(url);
+
+    console.log("Datos recibidos:", data);
 
     const ctx = document.getElementById("chartServicioTiempo");
 
     if (graficoServicioTiempo instanceof Chart) {
-    graficoServicioTiempo.destroy();
-        }
+        graficoServicioTiempo.destroy();
+    }
 
     graficoServicioTiempo = new Chart(ctx, {
         type: granularidad === "dia" ? "line" : "bar",
@@ -291,7 +300,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         document.getElementById("fechaInicio").value = "2025-01-01";
         document.getElementById("fechaFin").value = "2025-12-31";
-        
+
         await cargarListaServicios();
         await crearGraficoServicioTiempo();
 
@@ -305,6 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await crearGraficoServicios();
         await cargarTablaEstablecimientos();
         await cargarTablaServicios();
+
     } catch (error) {
         console.error(error);
         alert("Error al cargar la página de atenciones: " + error.message);
