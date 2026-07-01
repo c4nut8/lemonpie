@@ -17,20 +17,30 @@
     <div class="card-body">
         <div class="row g-3 align-items-end">
 
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label class="form-label">Servicio</label>
                 <select id="filtroServicio" class="form-select">
                     <option value="TODOS">Todos los servicios</option>
                 </select>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Agrupar por</label>
                 <select id="filtroGranularidad" class="form-select">
                     <option value="mes">Mes</option>
                     <option value="semana">Semana</option>
                     <option value="dia">Día</option>
                 </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Desde</label>
+                <input type="date" id="fechaInicio" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Hasta</label>
+                <input type="date" id="fechaFin" class="form-control">
             </div>
 
             <div class="col-md-2">

@@ -169,19 +169,34 @@ async function cargarListaServicios() {
     const data = await obtenerDatos("/api/lista-servicios");
     const select = document.getElementById("filtroServicio");
 
+    select.innerHTML = `<option value="TODOS">Todos los servicios</option>`;
+
     data.forEach(item => {
         const option = document.createElement("option");
-        option.value = item.servicio;
-        option.textContent = item.servicio;
+        option.value = item.cod_servicio;
+        option.textContent = item.servicio_label;
         select.appendChild(option);
     });
 }
 
 async function crearGraficoServicioTiempo() {
     const servicio = document.getElementById("filtroServicio").value;
-    const granularidad = document.getElementById("filtroGranularidad").value;
+    const servicioSelect = document.getElementById("filtroServicio");
+    const servicioTexto = servicioSelect.options[servicioSelect.selectedIndex].text;
 
-    const url = `/api/atenciones-servicio-tiempo?servicio=${encodeURIComponent(servicio)}&granularidad=${granularidad}`;
+    const granularidad = document.getElementById("filtroGranularidad").value;
+    const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFin = document.getElementById("fechaFin").value;
+
+    let url = `/api/atenciones-servicio-tiempo?servicio=${encodeURIComponent(servicio)}&granularidad=${granularidad}`;
+
+    if (fechaInicio) {
+        url += `&fecha_inicio=${fechaInicio}`;
+    }
+
+    if (fechaFin) {
+        url += `&fecha_fin=${fechaFin}`;
+    }
 
     const data = await obtenerDatos(url);
 
@@ -192,21 +207,34 @@ async function crearGraficoServicioTiempo() {
     }
 
     chartServicioTiempo = new Chart(ctx, {
-        type: "line",
+        type: granularidad === "dia" ? "line" : "bar",
         data: {
             labels: data.map(item => item.periodo),
             datasets: [{
-                label: servicio === "TODOS" ? "Todos los servicios" : servicio,
+                label: servicio === "TODOS" ? "Todos los servicios" : servicioTexto,
                 data: data.map(item => item.total_atenciones),
                 borderColor: "#17365D",
-                backgroundColor: "#17365D",
+                backgroundColor: "#5E86B5",
                 tension: 0.3,
                 fill: false
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
         }
     });
 }
