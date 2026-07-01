@@ -164,6 +164,7 @@ async function cargarTablaServicios() {
 }
 
 let serviciosDisponibles = [];
+let graficoServicioTiempo = null;
 
 async function cargarListaServicios() {
     const data = await obtenerDatos("/api/lista-servicios");
@@ -247,13 +248,13 @@ async function crearGraficoServicioTiempo() {
 
     const data = await obtenerDatos(url);
 
-    const ctx = document.getElementById("chartServicioTiempo");
+    const ctx = document.getElementById("graficoServicioTiempo");
 
-    if (chartServicioTiempo) {
-        chartServicioTiempo.destroy();
-    }
+    if (graficoServicioTiempo instanceof Chart) {
+    graficoServicioTiempo.destroy();
+        }
 
-    chartServicioTiempo = new Chart(ctx, {
+    graficoServicioTiempo = new Chart(ctx, {
         type: granularidad === "dia" ? "line" : "bar",
         data: {
             labels: data.map(item => item.periodo),
