@@ -248,7 +248,7 @@ async function crearGraficoServicioTiempo() {
 
     const data = await obtenerDatos(url);
 
-    const ctx = document.getElementById("graficoServicioTiempo");
+    const ctx = document.getElementById("chartServicioTiempo");
 
     if (graficoServicioTiempo instanceof Chart) {
     graficoServicioTiempo.destroy();
@@ -289,6 +289,9 @@ async function crearGraficoServicioTiempo() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     try {
+        document.getElementById("fechaInicio").value = "2025-01-01";
+        document.getElementById("fechaFin").value = "2025-12-31";
+        
         await cargarListaServicios();
         await crearGraficoServicioTiempo();
 

@@ -136,11 +136,11 @@ def obtener_atenciones_servicio_tiempo(
         COUNT(*) AS total_atenciones
     FROM dw.fact_atenciones_2025
     WHERE fecha_atencion_date IS NOT NULL
-      AND fecha_atencion_date <> ''
-      AND (%s = 'TODOS' OR cod_servicio = %s)
+      AND TRIM(fecha_atencion_date) <> ''
+      AND (%s = 'TODOS' OR TRIM(cod_servicio) = %s)
       AND (%s IS NULL OR fecha_atencion_date::date >= %s::date)
       AND (%s IS NULL OR fecha_atencion_date::date <= %s::date)
-    GROUP BY periodo, {periodio_orden if False else periodo_orden}
+    GROUP BY periodo, {periodo_orden}
     ORDER BY {periodo_orden};
     """
 
