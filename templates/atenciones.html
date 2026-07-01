@@ -19,10 +19,24 @@
 
             <div class="col-md-4">
                 <label class="form-label">Servicio</label>
-                <select id="filtroServicio" class="form-select">
-                    <option value="TODOS">Todos los servicios</option>
-                </select>
+                <input 
+                type="text" 
+                id="buscadorServicio"
+                class="form-control"
+                list="listaServicios"
+                placeholder="Escriba código o nombre del servicio"
+                value="Todos los servicios"
+                >
+
+                <datalist id="listaServicios"></datalist>
+
+                <input type="hidden" id="filtroServicio" value="TODOS">
+
+                <div class="form-hint">
+                    Puede buscar por código o descripción del servicio.
             </div>
+        </div>
+    </div>
 
             <div class="col-md-2">
                 <label class="form-label">Agrupar por</label>
@@ -174,5 +188,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/atenciones.js') }}"></script>
+<script src="{{ url_for('static', filename='js/atenciones.js') }}?v=3"></script>
 {% endblock %}

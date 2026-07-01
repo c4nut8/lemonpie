@@ -163,26 +163,73 @@ async function cargarTablaServicios() {
     });
 }
 
-let chartServicioTiempo = null;
+let serviciosDisponibles = [];
 
 async function cargarListaServicios() {
     const data = await obtenerDatos("/api/lista-servicios");
-    const select = document.getElementById("filtroServicio");
 
-    select.innerHTML = `<option value="TODOS">Todos los servicios</option>`;
+    serviciosDisponibles = data;
+
+    const datalist = document.getElementById("listaServicios");
+    datalist.innerHTML = "";
 
     data.forEach(item => {
         const option = document.createElement("option");
-        option.value = item.cod_servicio;
-        option.textContent = item.servicio_label;
-        select.appendChild(option);
+        option.value = item.servicio_label;
+        datalist.appendChild(option);
     });
+}
+function obtenerServicioSeleccionado() {
+    const textoBuscado = document.getElementById("buscadorServicio").value.trim().toLowerCase();
+    const inputHidden = document.getElementById("filtroServicio");
+
+    if (
+        textoBuscado === "" ||
+        textoBuscado === "todos" ||
+        textoBuscado === "todos los servicios"
+    ) {
+        inputHidden.value = "TODOS";
+        return {
+            codigo: "TODOS",
+            texto: "Todos los servicios"
+        };
+    }
+
+    const servicioEncontrado = serviciosDisponibles.find(item => {
+        const codigo = String(item.cod_servicio || "").toLowerCase();
+        const descripcion = String(item.descripcion_servicio || "").toLowerCase();
+        const label = String(item.servicio_label || "").toLowerCase();
+
+        return (
+            label === textoBuscado ||
+            codigo === textoBuscado ||
+            descripcion === textoBuscado ||
+            label.includes(textoBuscado)
+        );
+    });
+
+    if (servicioEncontrado) {
+        inputHidden.value = servicioEncontrado.cod_servicio;
+
+        return {
+            codigo: servicioEncontrado.cod_servicio,
+            texto: servicioEncontrado.servicio_label
+        };
+    }
+
+    inputHidden.value = "TODOS";
+
+    return {
+        codigo: "TODOS",
+        texto: "Todos los servicios"
+    };
 }
 
 async function crearGraficoServicioTiempo() {
-    const servicio = document.getElementById("filtroServicio").value;
-    const servicioSelect = document.getElementById("filtroServicio");
-    const servicioTexto = servicioSelect.options[servicioSelect.selectedIndex].text;
+    const servicioSeleccionado = obtenerServicioSeleccionado();
+
+    const servicio = servicioSeleccionado.codigo;
+    const servicioTexto = servicioSeleccionado.texto;
 
     const granularidad = document.getElementById("filtroGranularidad").value;
     const fechaInicio = document.getElementById("fechaInicio").value;
