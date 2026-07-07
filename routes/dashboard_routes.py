@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, send_file
 from flask_login import login_required, current_user
 from services import kpi_service
+from datetime import datetime
 
 from io import BytesIO
 from openpyxl import Workbook
@@ -187,6 +188,7 @@ def exportar_atenciones_excel():
         fecha_inicio = request.args.get("fecha_inicio")
         fecha_fin = request.args.get("fecha_fin")
 
+
         data = kpi_service.obtener_atenciones_servicio_tiempo(
             servicio=servicio,
             granularidad=granularidad,
@@ -194,44 +196,127 @@ def exportar_atenciones_excel():
             fecha_fin=fecha_fin
         )
 
+
+        # ==============================
+        # OBTENER INFORMACIÓN DEL SERVICIO
+        # ==============================
+
+        codigo_servicio = "TODOS"
+        nombre_servicio = "Todos los servicios"
+
+
+        if servicio != "TODOS":
+
+            lista_servicios = kpi_service.obtener_lista_servicios()
+
+            servicio_info = next(
+                (
+                    item for item in lista_servicios
+                    if str(item["cod_servicio"]).strip() == str(servicio).strip()
+                ),
+                None
+            )
+
+
+            if servicio_info:
+                codigo_servicio = servicio_info["cod_servicio"]
+                nombre_servicio = servicio_info["descripcion_servicio"]
+
+
+
+        # ==============================
+        # CREAR EXCEL
+        # ==============================
+
         wb = Workbook()
 
         ws = wb.active
         ws.title = "Atenciones"
 
+
         # Título
+
         ws["A1"] = "Reporte de atenciones SIS"
+
         ws["A1"].font = Font(
             bold=True,
             size=14,
             color="FFFFFF"
         )
+
         ws["A1"].fill = PatternFill(
             "solid",
             fgColor="17365D"
         )
 
-        ws.merge_cells("A1:B1")
+        ws.merge_cells("A1:D1")
 
 
-        # Encabezados
 
-        ws["A3"] = "Periodo"
-        ws["B3"] = "Total atenciones"
+        # ==============================
+        # INFORMACIÓN DEL FILTRO
+        # ==============================
+
+        ws["A3"] = "Código servicio"
+        ws["B3"] = codigo_servicio
 
 
-        for cell in ws["3:3"]:
+        ws["A4"] = "Servicio"
+        ws["B4"] = nombre_servicio
+
+
+        ws["A5"] = "Agrupación"
+        ws["B5"] = granularidad.capitalize()
+
+
+        ws["A6"] = "Fecha inicio"
+        ws["B6"] = fecha_inicio if fecha_inicio else "Sin filtro"
+
+
+        ws["A7"] = "Fecha fin"
+        ws["B7"] = fecha_fin if fecha_fin else "Sin filtro"
+        
+        ws["A8"] = "Fecha de consulta"
+        ws["B8"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+
+
+        for fila in range(3,9):
+
+            ws[f"A{fila}"].font = Font(
+                bold=True
+            )
+
+
+
+        # ==============================
+        # TABLA DE RESULTADOS
+        # ==============================
+
+
+        ws["A10"] = "Periodo"
+        ws["B10"] = "Código servicio"
+        ws["C10"] = "Servicio"
+        ws["D10"] = "Total atenciones"
+
+
+
+        for cell in ws["10:10"]:
+
             cell.font = Font(
                 bold=True,
                 color="FFFFFF"
             )
+
             cell.fill = PatternFill(
                 "solid",
                 fgColor="5E86B5"
             )
 
 
-        fila = 4
+
+        fila = 11
+
 
         for item in data:
 
@@ -244,14 +329,37 @@ def exportar_atenciones_excel():
             ws.cell(
                 fila,
                 2,
+                codigo_servicio
+            )
+
+            ws.cell(
+                fila,
+                3,
+                nombre_servicio
+            )
+
+            ws.cell(
+                fila,
+                4,
                 item["total_atenciones"]
             )
 
             fila += 1
 
 
-        ws.column_dimensions["A"].width = 20
-        ws.column_dimensions["B"].width = 20
+
+        # Ajustar columnas
+
+        ws.column_dimensions["A"].width = 18
+        ws.column_dimensions["B"].width = 18
+        ws.column_dimensions["C"].width = 45
+        ws.column_dimensions["D"].width = 20
+
+
+
+        # ==============================
+        # GENERAR ARCHIVO
+        # ==============================
 
 
         archivo = BytesIO()
@@ -261,15 +369,24 @@ def exportar_atenciones_excel():
         archivo.seek(0)
 
 
+
+        nombre_archivo = (
+            f"Reporte_{codigo_servicio}_{granularidad}.xlsx"
+        )
+
+
+
         return send_file(
             archivo,
             as_attachment=True,
-            download_name="reporte_atenciones.xlsx",
+            download_name=nombre_archivo,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
 
+
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }),500
