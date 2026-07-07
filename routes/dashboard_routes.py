@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, request, send_file
 from flask_login import login_required, current_user
 from services import kpi_service
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from io import BytesIO
 from openpyxl import Workbook
@@ -277,7 +278,7 @@ def exportar_atenciones_excel():
         ws["B7"] = fecha_fin if fecha_fin else "Sin filtro"
         
         ws["A8"] = "Fecha de consulta"
-        ws["B8"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+        ws["B8"] = datetime.now(ZoneInfo("America/Lima")).strftime("%d/%m/%Y %H:%M")
 
 
 
