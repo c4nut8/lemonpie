@@ -17,6 +17,7 @@ def dashboard():
 
 
 @dashboard_bp.route("/atenciones")
+@login_required
 def atenciones():
     return render_template("atenciones.html")
 
@@ -171,3 +172,25 @@ def api_atenciones_servicio_tiempo():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@dashboard_bp.route("/api/exportar-atenciones-excel")
+@login_required
+def exportar_atenciones_excel():
+
+    try:
+        servicio = request.args.get("servicio", "TODOS")
+        granularidad = request.args.get("granularidad", "mes")
+        fecha_inicio = request.args.get("fecha_inicio")
+        fecha_fin = request.args.get("fecha_fin")
+
+        data = kpi_service.obtener_atenciones_servicio_tiempo(
+            servicio,
+            granularidad,
+            fecha_inicio,
+            fecha_fin
+        )
+
+        return generar_excel(data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}),500

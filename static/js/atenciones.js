@@ -176,7 +176,7 @@ async function cargarListaServicios() {
 
     data.forEach(item => {
         const option = document.createElement("option");
-        option.value = item.servicio_label;
+        option.value = `${item.cod_servicio} - ${item.descripcion_servicio}`;
         datalist.appendChild(option);
     });
 }
