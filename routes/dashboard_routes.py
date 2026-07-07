@@ -1,6 +1,10 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, send_file
 from flask_login import login_required, current_user
 from services import kpi_service
+
+from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -172,7 +176,7 @@ def api_atenciones_servicio_tiempo():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 @dashboard_bp.route("/api/exportar-atenciones-excel")
 @login_required
 def exportar_atenciones_excel():
@@ -184,13 +188,88 @@ def exportar_atenciones_excel():
         fecha_fin = request.args.get("fecha_fin")
 
         data = kpi_service.obtener_atenciones_servicio_tiempo(
-            servicio,
-            granularidad,
-            fecha_inicio,
-            fecha_fin
+            servicio=servicio,
+            granularidad=granularidad,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin
         )
 
-        return generar_excel(data)
+        wb = Workbook()
+
+        ws = wb.active
+        ws.title = "Atenciones"
+
+        # Título
+        ws["A1"] = "Reporte de atenciones SIS"
+        ws["A1"].font = Font(
+            bold=True,
+            size=14,
+            color="FFFFFF"
+        )
+        ws["A1"].fill = PatternFill(
+            "solid",
+            fgColor="17365D"
+        )
+
+        ws.merge_cells("A1:B1")
+
+
+        # Encabezados
+
+        ws["A3"] = "Periodo"
+        ws["B3"] = "Total atenciones"
+
+
+        for cell in ws["3:3"]:
+            cell.font = Font(
+                bold=True,
+                color="FFFFFF"
+            )
+            cell.fill = PatternFill(
+                "solid",
+                fgColor="5E86B5"
+            )
+
+
+        fila = 4
+
+        for item in data:
+
+            ws.cell(
+                fila,
+                1,
+                item["periodo"]
+            )
+
+            ws.cell(
+                fila,
+                2,
+                item["total_atenciones"]
+            )
+
+            fila += 1
+
+
+        ws.column_dimensions["A"].width = 20
+        ws.column_dimensions["B"].width = 20
+
+
+        archivo = BytesIO()
+
+        wb.save(archivo)
+
+        archivo.seek(0)
+
+
+        return send_file(
+            archivo,
+            as_attachment=True,
+            download_name="reporte_atenciones.xlsx",
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
 
     except Exception as e:
-        return jsonify({"error": str(e)}),500
+        return jsonify({
+            "error": str(e)
+        }),500

@@ -296,6 +296,41 @@ async function crearGraficoServicioTiempo() {
     });
 }
 
+function descargarExcel(){
+
+    const servicioSeleccionado = obtenerServicioSeleccionado();
+
+    const params = new URLSearchParams();
+
+    params.append(
+        "servicio",
+        servicioSeleccionado.codigo
+    );
+
+    params.append(
+        "granularidad",
+        document.getElementById("filtroGranularidad").value
+    );
+
+
+    params.append(
+        "fecha_inicio",
+        document.getElementById("fechaInicio").value
+    );
+
+
+    params.append(
+        "fecha_fin",
+        document.getElementById("fechaFin").value
+    );
+
+
+    window.location.href =
+        "/api/exportar-atenciones-excel?" +
+        params.toString();
+
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         document.getElementById("fechaInicio").value = "2025-01-01";
@@ -307,6 +342,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("btnAplicarFiltros").addEventListener("click", async () => {
             await crearGraficoServicioTiempo();
         });
+
+        document.getElementById("btnDescargarExcel")
+        .addEventListener("click", descargarExcel);
 
         await crearGraficoAtencionesMes();
         await crearGraficoSexo();

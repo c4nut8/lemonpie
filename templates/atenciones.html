@@ -15,10 +15,14 @@
     </div>
 
     <div class="card-body">
+
         <div class="row g-3 align-items-end">
 
+            <!-- Servicio -->
             <div class="col-md-4">
-                <label class="form-label">Servicio</label>
+                <label class="form-label">
+                    Servicio
+                </label>
 
                 <input 
                     type="text" 
@@ -31,39 +35,103 @@
 
                 <datalist id="listaServicios"></datalist>
 
-                <input type="hidden" id="filtroServicio" value="TODOS">
+                <input 
+                    type="hidden" 
+                    id="filtroServicio" 
+                    value="TODOS"
+                >
 
                 <div class="form-hint">
                     Puede buscar por código o descripción del servicio.
                 </div>
             </div>
 
+
+            <!-- Agrupación -->
             <div class="col-md-2">
-                <label class="form-label">Agrupar por</label>
-                <select id="filtroGranularidad" class="form-select">
-                    <option value="mes">Mes</option>
-                    <option value="semana">Semana</option>
-                    <option value="dia">Día</option>
+                <label class="form-label">
+                    Agrupar por
+                </label>
+
+                <select 
+                    id="filtroGranularidad" 
+                    class="form-select"
+                >
+                    <option value="mes">
+                        Mes
+                    </option>
+
+                    <option value="semana">
+                        Semana
+                    </option>
+
+                    <option value="dia">
+                        Día
+                    </option>
+
                 </select>
             </div>
 
+
+            <!-- Fecha inicio -->
             <div class="col-md-2">
-                <label class="form-label">Desde</label>
-                <input type="date" id="fechaInicio" class="form-control">
+                <label class="form-label">
+                    Desde
+                </label>
+
+                <input 
+                    type="date" 
+                    id="fechaInicio" 
+                    class="form-control"
+                >
             </div>
 
+
+            <!-- Fecha fin -->
             <div class="col-md-2">
-                <label class="form-label">Hasta</label>
-                <input type="date" id="fechaFin" class="form-control">
+                <label class="form-label">
+                    Hasta
+                </label>
+
+                <input 
+                    type="date" 
+                    id="fechaFin" 
+                    class="form-control"
+                >
             </div>
 
+
+            <!-- Botones -->
             <div class="col-md-2">
-                <button id="btnAplicarFiltros" class="btn btn-primary w-100">
-                    Aplicar
-                </button>
+
+                <div class="d-grid gap-2">
+
+                    <button 
+                        id="btnAplicarFiltros"
+                        class="btn btn-primary"
+                    >
+                        <span>
+                            Aplicar
+                        </span>
+                    </button>
+
+
+                    <button 
+                        id="btnDescargarExcel"
+                        class="btn btn-outline-success"
+                    >
+                        <span>
+                            Descargar Excel
+                        </span>
+                    </button>
+
+                </div>
+
             </div>
+
 
         </div>
+
     </div>
 </div>
 
