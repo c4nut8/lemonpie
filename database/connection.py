@@ -30,21 +30,30 @@ def fetch_one(query, params=None):
 
     try:
         conn = get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor = conn.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor
+        )
         cursor.execute(query, params)
         return cursor.fetchone()
 
     except psycopg2.Error as e:
-        print("Error en fetch_one:", e)
-        return None
+        print(
+            f"ERROR DE BASE DE DATOS EN FETCH_ONE: "
+            f"{type(e).__name__}: {e}",
+            flush=True
+        )
+        raise RuntimeError(
+            "No se pudo consultar la base de datos."
+        ) from e
 
     finally:
         if cursor is not None:
             cursor.close()
+
         if conn is not None:
             conn.close()
 
-            
+
 def fetch_all(query, params=None):
     conn = None
     cursor = None
