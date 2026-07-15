@@ -1,4 +1,3 @@
-from datetime import datetime
 from database.connection import fetch_one, fetch_all
 from database import queries
 
@@ -113,35 +112,12 @@ def obtener_lista_servicios():
     return fetch_all(query)
 
 
-def _validar_fechas(fecha_inicio=None, fecha_fin=None):
-    def _parsear(fecha, nombre):
-        if fecha in (None, ""):
-            return None
-        try:
-            return datetime.strptime(fecha, "%Y-%m-%d").date()
-        except ValueError as exc:
-            raise ValueError(f"{nombre} debe tener formato YYYY-MM-DD.") from exc
-
-    fecha_inicio_dt = _parsear(fecha_inicio, "fecha_inicio")
-    fecha_fin_dt = _parsear(fecha_fin, "fecha_fin")
-
-    if fecha_inicio_dt and fecha_fin_dt and fecha_inicio_dt > fecha_fin_dt:
-        raise ValueError("La fecha inicial no puede ser mayor que la fecha final.")
-
-    return fecha_inicio_dt, fecha_fin_dt
-
-
 def obtener_atenciones_servicio_tiempo(
     servicio="TODOS",
     granularidad="mes",
     fecha_inicio=None,
     fecha_fin=None
 ):
-    if granularidad not in {"dia", "semana", "mes"}:
-        raise ValueError("La granularidad debe ser una de: dia, semana o mes.")
-
-    _validar_fechas(fecha_inicio, fecha_fin)
-
     fecha_sql = "NULLIF(TRIM(fecha_atencion_date), '')::date"
 
     if granularidad == "dia":
