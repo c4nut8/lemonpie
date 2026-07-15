@@ -35,8 +35,7 @@ def fetch_one(query, params=None):
         return cursor.fetchone()
 
     except psycopg2.Error as e:
-        print("Error en fetch_one:", e)
-        return None
+        raise RuntimeError("No se pudo consultar la base de datos.") from e
 
     finally:
         if cursor is not None:
@@ -56,8 +55,7 @@ def fetch_all(query, params=None):
         return cursor.fetchall()
 
     except psycopg2.Error as e:
-        print("Error en fetch_all:", e)
-        return []
+        raise RuntimeError("No se pudo consultar la base de datos.") from e
 
     finally:
         if cursor is not None:

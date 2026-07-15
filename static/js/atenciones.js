@@ -130,14 +130,24 @@ async function cargarTablaEstablecimientos() {
         const totalAtenciones = valorSeguro(item, ["total_atenciones", "atenciones"]);
         const valorSis = valorSeguro(item, ["total_valorizado_sis", "valor_total_sis", "valor_sis"]);
 
-        tbody.innerHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${establecimiento}</td>
-                <td class="text-end">${formatoNumero(totalAtenciones)}</td>
-                <td class="text-end">${formatoMoneda(valorSis)}</td>
-            </tr>
-        `;
+        const row = document.createElement("tr");
+        const cells = [
+            String(index + 1),
+            establecimiento,
+            formatoNumero(totalAtenciones),
+            formatoMoneda(valorSis)
+        ];
+
+        cells.forEach((value, cellIndex) => {
+            const cell = document.createElement("td");
+            if (cellIndex === 2 || cellIndex === 3) {
+                cell.className = "text-end";
+            }
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
     });
 }
 
@@ -152,14 +162,24 @@ async function cargarTablaServicios() {
         const totalAtenciones = valorSeguro(item, ["total_atenciones", "atenciones"]);
         const valorSis = valorSeguro(item, ["total_valorizado_sis", "valor_total_sis", "valor_sis"]);
 
-        tbody.innerHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${servicio}</td>
-                <td class="text-end">${formatoNumero(totalAtenciones)}</td>
-                <td class="text-end">${formatoMoneda(valorSis)}</td>
-            </tr>
-        `;
+        const row = document.createElement("tr");
+        const cells = [
+            String(index + 1),
+            servicio,
+            formatoNumero(totalAtenciones),
+            formatoMoneda(valorSis)
+        ];
+
+        cells.forEach((value, cellIndex) => {
+            const cell = document.createElement("td");
+            if (cellIndex === 2 || cellIndex === 3) {
+                cell.className = "text-end";
+            }
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
     });
 }
 

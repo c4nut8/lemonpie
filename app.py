@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify, redirect, url_for
+import secrets
+from flask import Flask, request, jsonify, redirect, url_for, session, current_app
 from flask_login import LoginManager
 from datetime import timedelta
 
@@ -16,13 +17,35 @@ def create_app():
         static_url_path="/static"
     )
 
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "clave_temporal_solo_local")
+    secret_key = os.getenv("SECRET_KEY")
+    if not secret_key:
+        raise RuntimeError("SECRET_KEY debe configurarse en el entorno antes de iniciar la aplicación.")
+
+    app.config["SECRET_KEY"] = secret_key
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
     # En Render usa HTTPS, en local no bloquea la sesión
     app.config["SESSION_COOKIE_SECURE"] = os.getenv("RENDER") == "true"
+
+    def get_csrf_token():
+        if "_csrf_token" not in session:
+            session["_csrf_token"] = secrets.token_hex(16)
+        return session["_csrf_token"]
+
+    app.jinja_env.globals["csrf_token"] = get_csrf_token
+
+    @app.before_request
+    def enforce_csrf():
+        if current_app.config.get("TESTING"):
+            return None
+
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and request.path in {"/login", "/logout"}:
+            expected_token = session.get("_csrf_token")
+            submitted_token = request.form.get("csrf_token")
+            if not expected_token or not submitted_token or submitted_token != expected_token:
+                return jsonify({"error": "Token CSRF inválido."}), 400
 
     login_manager = LoginManager()
     login_manager.init_app(app)

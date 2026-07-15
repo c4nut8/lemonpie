@@ -18,6 +18,10 @@ class KpiServiceTestCase(unittest.TestCase):
 
         self.assertEqual(data, [])
 
+    def test_obtener_atenciones_servicio_tiempo_rejects_invalid_granularity(self):
+        with self.assertRaises(ValueError):
+            kpi_service.obtener_atenciones_servicio_tiempo(granularidad="trimestre")
+
 
 if __name__ == "__main__":
     unittest.main()

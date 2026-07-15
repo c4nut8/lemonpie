@@ -46,6 +46,8 @@
                     <input type="password" name="password" class="form-control" placeholder="Ingrese su contraseña" required>
                 </div>
 
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                 <div class="form-footer">
                     <button type="submit" class="btn btn-primary w-100">
                         Iniciar sesión

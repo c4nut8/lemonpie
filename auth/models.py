@@ -59,6 +59,14 @@ class Usuario(UserMixin):
 
     @staticmethod
     def ensure_default_user():
+        default_username = os.getenv("DEFAULT_USERNAME")
+        default_password = os.getenv("DEFAULT_PASSWORD")
+        default_role = os.getenv("DEFAULT_ROLE", "admin")
+        default_names = os.getenv("DEFAULT_NAMES", "Administrador")
+
+        if not default_username or not default_password:
+            raise RuntimeError("DEFAULT_USERNAME y DEFAULT_PASSWORD deben configurarse en el entorno.")
+
         conn = get_connection()
         try:
             with conn.cursor() as cursor:
@@ -73,10 +81,6 @@ class Usuario(UserMixin):
                     activo BOOLEAN NOT NULL DEFAULT TRUE
                 );
                 """)
-                default_username = os.getenv("DEFAULT_USERNAME", "admin")
-                default_password = os.getenv("DEFAULT_PASSWORD", "admin123")
-                default_role = os.getenv("DEFAULT_ROLE", "admin")
-                default_names = os.getenv("DEFAULT_NAMES", "Administrador")
                 cursor.execute("""
                 INSERT INTO dw.usuarios_sistema (username, password_hash, rol, nombres, activo)
                 SELECT %s, %s, %s, %s, TRUE

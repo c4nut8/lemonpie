@@ -1,5 +1,9 @@
+import os
 import unittest
 from unittest.mock import patch
+
+os.environ.setdefault("DEFAULT_USERNAME", "admin")
+os.environ.setdefault("DEFAULT_PASSWORD", "secret")
 
 from auth.models import Usuario
 
@@ -53,7 +57,7 @@ class AuthModelsTestCase(unittest.TestCase):
     def test_ensure_default_user_creates_admin_when_missing(self):
         conn = DummyConnection()
 
-        with patch("auth.models.get_connection", return_value=conn), patch("auth.models.os.getenv", side_effect=lambda key, default=None: default):
+        with patch("auth.models.get_connection", return_value=conn):
             Usuario.ensure_default_user()
 
         self.assertTrue(conn.committed)
