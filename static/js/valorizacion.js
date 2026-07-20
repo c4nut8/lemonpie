@@ -36,8 +36,35 @@ async function cargarResumenValorizacion() {
         formatoNumero(data.atenciones_sin_valorizacion);
 }
 
-async function crearGraficoValorizacionMes() {
-    const data = await obtenerDatos("/api/valorizacion-mes");
+async function crearGraficoValorizacionMes(fechaInicio = null, fechaFin = null) {
+    let data = await obtenerDatos("/api/valorizacion-mes");
+
+    if (fechaInicio || fechaFin) {
+        data = data.filter(item => {
+            const periodo = String(item.periodo_atencion || item.periodo || "");
+            const periodoDate = parsePeriodoFecha(periodo);
+
+            if (!periodoDate) {
+                return false;
+            }
+
+            if (fechaInicio) {
+                const inicio = new Date(fechaInicio + "T00:00:00");
+                if (periodoDate < inicio) {
+                    return false;
+                }
+            }
+
+            if (fechaFin) {
+                const fin = new Date(fechaFin + "T23:59:59");
+                if (periodoDate > fin) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
 
     new Chart(document.getElementById("chartValorizacionMes"), {
         type: "line",
@@ -57,6 +84,22 @@ async function crearGraficoValorizacionMes() {
             maintainAspectRatio: false
         }
     });
+}
+
+function parsePeriodoFecha(periodo) {
+    if (!periodo) {
+        return null;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(periodo)) {
+        return new Date(periodo + "T00:00:00");
+    }
+
+    if (/^\d{4}-\d{2}$/.test(periodo)) {
+        return new Date(periodo + "-01T00:00:00");
+    }
+
+    return null;
 }
 
 async function crearGraficoEstadoValorizacion() {
@@ -152,9 +195,116 @@ async function cargarTablaComponentesValorizacion() {
     });
 }
 
+async function cargarGraficosValorizacionAnteriores() {
+    try {
+        const fechaInicioInput = document.getElementById("fechaInicioValorizacion");
+        const fechaFinInput = document.getElementById("fechaFinValorizacion");
+
+        if (fechaInicioInput && fechaFinInput) {
+            fechaInicioInput.value = "2025-01-01";
+            fechaFinInput.value = "2025-12-31";
+        }
+
+        await cargarResumenValorizacion();
+        await crearGraficoValorizacionMes(
+            fechaInicioInput?.value,
+            fechaFinInput?.value
+        );
+        await crearGraficoEstadoValorizacion();
+        await crearGraficoObservados();
+        await crearGraficoComponentesValorizacion();
+        await cargarTablaComponentesValorizacion();
+
+        const botonAplicar = document.getElementById("btnAplicarFiltrosValorizacion");
+        if (botonAplicar) {
+            botonAplicar.addEventListener("click", async () => {
+                await crearGraficoValorizacionMes(
+                    fechaInicioInput?.value,
+                    fechaFinInput?.value
+                );
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error al cargar la página de valorización: " + error.message);
+    }
+}
+
+let graficoValorizacionFiltrada = null;
+
+function parametrosValorizacion() {
+    const params = new URLSearchParams({
+        tipo: document.getElementById("filtroTipoValorizacion").value,
+        granularidad: document.getElementById("filtroGranularidadValorizacion").value
+    });
+    const inicio = document.getElementById("fechaInicioValorizacion").value;
+    const fin = document.getElementById("fechaFinValorizacion").value;
+    if (inicio) params.set("fecha_inicio", inicio);
+    if (fin) params.set("fecha_fin", fin);
+    return params;
+}
+
+function validarFechasValorizacion() {
+    const inicio = document.getElementById("fechaInicioValorizacion").value;
+    const fin = document.getElementById("fechaFinValorizacion").value;
+    if (inicio && fin && inicio > fin) throw new Error("La fecha de inicio no puede ser posterior a la fecha final.");
+}
+
+async function cargarValorizacionFiltrada() {
+    validarFechasValorizacion();
+    const data = await obtenerDatos(`/api/valorizacion-filtrada?${parametrosValorizacion()}`);
+    const tipoSelect = document.getElementById("filtroTipoValorizacion");
+    const agrupacionSelect = document.getElementById("filtroGranularidadValorizacion");
+    const tipoLabel = tipoSelect.options[tipoSelect.selectedIndex].text;
+    const agrupacionLabel = agrupacionSelect.options[agrupacionSelect.selectedIndex].text;
+    document.getElementById("resumenFiltroValorizacion").textContent = `${tipoLabel} · Agrupación: ${agrupacionLabel}`;
+
+    if (graficoValorizacionFiltrada instanceof Chart) graficoValorizacionFiltrada.destroy();
+    graficoValorizacionFiltrada = new Chart(document.getElementById("chartValorizacionFiltrada"), {
+        type: agrupacionSelect.value === "dia" ? "line" : "bar",
+        data: { labels: data.map(item => item.periodo), datasets: [{ label: tipoLabel, data: data.map(item => Number(item.monto_valorizado || 0)), borderColor: "#17365D", backgroundColor: "#5E86B5", tension: 0.3, fill: false }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+    });
+
+    const tbody = document.getElementById("tablaValorizacionFiltrada");
+    tbody.innerHTML = "";
+    if (!data.length) tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay datos para los filtros seleccionados.</td></tr>';
+    data.forEach(item => {
+        const row = document.createElement("tr");
+        [item.periodo, formatoNumero(item.total_atenciones), formatoNumero(item.atenciones_valorizadas), formatoMoneda(item.monto_valorizado), formatoMoneda(item.promedio_valorizado)].forEach((valor, index) => {
+            const cell = document.createElement("td");
+            if (index > 0) cell.className = "text-end";
+            cell.textContent = valor;
+            row.appendChild(cell);
+        });
+        tbody.appendChild(row);
+    });
+
+    const totalAtenciones = data.reduce((suma, item) => suma + Number(item.total_atenciones || 0), 0);
+    const totalValorizadas = data.reduce((suma, item) => suma + Number(item.atenciones_valorizadas || 0), 0);
+    const totalMonto = data.reduce((suma, item) => suma + Number(item.monto_valorizado || 0), 0);
+    const promedio = totalValorizadas ? totalMonto / totalValorizadas : 0;
+    document.getElementById("totalesValorizacionFiltrada").innerHTML = data.length ? `<tr class="fw-bold"><td>Total</td><td class="text-end">${formatoNumero(totalAtenciones)}</td><td class="text-end">${formatoNumero(totalValorizadas)}</td><td class="text-end">${formatoMoneda(totalMonto)}</td><td class="text-end">${formatoMoneda(promedio)}</td></tr>` : "";
+    document.getElementById("cantidadResultadosValorizacion").textContent = `${data.length} ${data.length === 1 ? "periodo" : "periodos"}`;
+}
+
+function descargarValorizacionExcel() {
+    try {
+        validarFechasValorizacion();
+        window.location.href = `/api/exportar-valorizacion-excel?${parametrosValorizacion()}`;
+    } catch (error) { alert(error.message); }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     try {
+        document.getElementById("fechaInicioValorizacion").value = "2025-01-01";
+        document.getElementById("fechaFinValorizacion").value = "2025-12-31";
+        document.getElementById("btnAplicarFiltrosValorizacion").addEventListener("click", async () => {
+            try { await cargarValorizacionFiltrada(); } catch (error) { alert(error.message); }
+        });
+        document.getElementById("btnDescargarValorizacion").addEventListener("click", descargarValorizacionExcel);
         await cargarResumenValorizacion();
+        await cargarValorizacionFiltrada();
         await crearGraficoValorizacionMes();
         await crearGraficoEstadoValorizacion();
         await crearGraficoObservados();

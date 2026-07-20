@@ -9,6 +9,80 @@
     <h2 class="page-title">Valorización económica SIS</h2>
 </div>
 
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Filtros de valorización</h3>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-3">
+                <label class="form-label">Tipo de valorización</label>
+                <select id="filtroTipoValorizacion" class="form-select">
+                    <option value="todos">Todos los componentes</option>
+                    <option value="servicios">Servicios</option>
+                    <option value="medicamentos">Medicamentos</option>
+                    <option value="insumos">Insumos</option>
+                    <option value="procedimientos">Procedimientos</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Agrupar por</label>
+                <select id="filtroGranularidadValorizacion" class="form-select">
+                    <option value="mes">Mes</option>
+                    <option value="semana">Semana</option>
+                    <option value="dia">Día</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Desde</label>
+                <input type="date" id="fechaInicioValorizacion" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Hasta</label>
+                <input type="date" id="fechaFinValorizacion" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <div class="d-grid gap-2">
+                    <button id="btnAplicarFiltrosValorizacion" type="button" class="btn btn-primary">Aplicar</button>
+                    <button id="btnDescargarValorizacion" type="button" class="btn btn-outline-success">Descargar Excel</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mb-4">
+    <div class="col-12">
+        <div class="card chart-card-tabler">
+            <div class="card-header"><div>
+                <h3 class="card-title">Resultados del filtro</h3>
+                <div class="text-muted small" id="resumenFiltroValorizacion">Todos los componentes · Agrupación mensual</div>
+            </div></div>
+            <div class="card-body"><canvas id="chartValorizacionFiltrada"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Datos obtenidos</h3>
+        <div class="ms-auto text-muted small" id="cantidadResultadosValorizacion">0 periodos</div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table table-striped">
+            <thead><tr><th>Periodo</th><th class="text-end">Atenciones</th><th class="text-end">Valorizadas</th><th class="text-end">Monto</th><th class="text-end">Promedio</th></tr></thead>
+            <tbody id="tablaValorizacionFiltrada"><tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr></tbody>
+            <tfoot id="totalesValorizacionFiltrada"></tfoot>
+        </table>
+    </div>
+</div>
+
 <div class="row row-deck row-cards mb-4">
 
     <div class="col-sm-6 col-lg-3">
@@ -133,5 +207,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/valorizacion.js') }}"></script>
+<script src="{{ url_for('static', filename='js/valorizacion.js') }}?v=2"></script>
 {% endblock %}

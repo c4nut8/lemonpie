@@ -7,11 +7,15 @@
 <div class="page-header mb-3">
     <div class="page-pretitle">Producción asistencial</div>
     <h2 class="page-title">Análisis de atenciones</h2>
+    <div class="text-muted mt-1">Consulta la evolución de las atenciones y compara servicios por periodo.</div>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 filter-card">
     <div class="card-header">
-        <h3 class="card-title">Filtros de análisis</h3>
+        <div>
+            <h3 class="card-title">Filtros de análisis</h3>
+            <div class="text-muted small">Selecciona un servicio, agrupación y rango de fechas.</div>
+        </div>
     </div>
 
     <div class="card-body">
@@ -19,7 +23,7 @@
         <div class="row g-3 align-items-end">
 
             <!-- Servicio -->
-            <div class="col-md-4">
+            <div class="col-lg-6 col-md-12 filter-field">
                 <label class="form-label">
                     Servicio
                 </label>
@@ -30,7 +34,8 @@
                     class="form-control"
                     list="listaServicios"
                     placeholder="Escriba código o nombre del servicio"
-                    value="Todos los servicios"
+                    value=""
+                    autocomplete="off"
                 >
 
                 <datalist id="listaServicios"></datalist>
@@ -42,13 +47,21 @@
                 >
 
                 <div class="form-hint">
-                    Puede buscar por código o descripción del servicio.
+                    Vacío equivale a todos los servicios.
                 </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12 filter-field">
+                <label class="form-label">Establecimiento</label>
+                <input type="text" id="buscadorEstablecimiento" class="form-control" list="listaEstablecimientos" placeholder="Todos los establecimientos" autocomplete="off">
+                <datalist id="listaEstablecimientos"></datalist>
+                <input type="hidden" id="filtroEstablecimiento" value="TODOS">
+                <div class="form-hint">Busca por código o nombre; vacío incluye todos.</div>
             </div>
 
 
             <!-- Agrupación -->
-            <div class="col-md-2">
+            <div class="col-lg-4 col-md-4 filter-field">
                 <label class="form-label">
                     Agrupar por
                 </label>
@@ -74,7 +87,7 @@
 
 
             <!-- Fecha inicio -->
-            <div class="col-md-2">
+            <div class="col-lg-4 col-md-4 filter-field">
                 <label class="form-label">
                     Desde
                 </label>
@@ -88,7 +101,7 @@
 
 
             <!-- Fecha fin -->
-            <div class="col-md-2">
+            <div class="col-lg-4 col-md-4 filter-field">
                 <label class="form-label">
                     Hasta
                 </label>
@@ -101,45 +114,38 @@
             </div>
 
 
-            <!-- Botones -->
-            <div class="col-md-2">
+        </div>
 
-                <div class="d-grid gap-2">
-
-                    <button 
-                        id="btnAplicarFiltros"
-                        class="btn btn-primary"
-                    >
-                        <span>
-                            Aplicar
-                        </span>
-                    </button>
-
-
-                    <button 
-                        id="btnDescargarExcel"
-                        class="btn btn-outline-success"
-                    >
-                        <span>
-                            Descargar Excel
-                        </span>
-                    </button>
-
-                </div>
-
+        <div class="filter-actions mt-4 pt-3 border-top">
+            <div class="text-muted small" id="estadoFiltroAtenciones" role="status">Listo para consultar.</div>
+            <div class="d-flex flex-wrap gap-2">
+                <button id="btnLimpiarFiltros" type="button" class="btn btn-ghost-secondary">
+                    <i class="ti ti-refresh me-1"></i>Restablecer
+                </button>
+                <button id="btnDescargarExcel" type="button" class="btn btn-outline-success">
+                    <i class="ti ti-file-spreadsheet me-1"></i>Descargar Excel
+                </button>
+                <button id="btnAplicarFiltros" type="button" class="btn btn-primary">
+                    <i class="ti ti-filter me-1"></i>Aplicar filtros
+                </button>
             </div>
-
-
         </div>
 
     </div>
+</div>
+
+<div class="row row-deck row-cards mb-4">
+    <div class="col-sm-6 col-lg-3"><div class="card kpi-card-tabler"><div class="card-body"><div class="subheader">Total exacto</div><div class="h1 text-primary" id="totalAtencionesFiltradas">—</div><div class="text-muted">Suma de todos los periodos</div></div></div></div>
+    <div class="col-sm-6 col-lg-3"><div class="card kpi-card-tabler"><div class="card-body"><div class="subheader">Periodos obtenidos</div><div class="h1" id="totalPeriodosFiltrados">—</div><div class="text-muted">Según agrupación elegida</div></div></div></div>
+    <div class="col-sm-6 col-lg-3"><div class="card kpi-card-tabler"><div class="card-body"><div class="subheader">Promedio por periodo</div><div class="h1 text-info" id="promedioAtencionesFiltradas">—</div><div class="text-muted">Producción media</div></div></div></div>
+    <div class="col-sm-6 col-lg-3"><div class="card kpi-card-tabler"><div class="card-body"><div class="subheader">Máximo del periodo</div><div class="h1 text-success" id="maximoAtencionesFiltradas">—</div><div class="text-muted" id="periodoMaximoAtenciones">Sin datos</div></div></div></div>
 </div>
 
 <div class="row row-cards mb-4">
     <div class="col-lg-12">
         <div class="card chart-card-tabler">
             <div class="card-header">
-                <h3 class="card-title">Atenciones por servicio según periodo</h3>
+                <div><h3 class="card-title">Evolución de atenciones</h3><div class="text-muted small" id="resumenFiltroAtenciones">Todos los servicios · Mensual</div></div>
             </div>
             <div class="card-body">
                 <canvas id="chartServicioTiempo"></canvas>
@@ -147,6 +153,13 @@
         </div>
     </div>
 </div>      
+
+<div class="card mt-4 mb-4">
+    <div class="card-header"><h3 class="card-title">Detalle del resultado</h3><div class="ms-auto text-muted small" id="cantidadResultadosAtenciones">0 periodos</div></div>
+    <div class="table-responsive"><table class="table table-vcenter card-table table-striped"><thead><tr><th>Periodo</th><th class="text-end">Atenciones</th><th class="text-end">Participación</th></tr></thead><tbody id="tablaAtencionesFiltradas"><tr><td colspan="3" class="text-center text-muted">Cargando...</td></tr></tbody><tfoot id="totalTablaAtenciones"></tfoot></table></div>
+</div>
+
+<div class="section-heading"><div><h3>Panorama general</h3><p>Indicadores complementarios de producción asistencial.</p></div></div>
 <div class="row row-cards">
 
     <div class="col-lg-6">
@@ -256,5 +269,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/atenciones.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/atenciones.js') }}?v=7"></script>
 {% endblock %}

@@ -2,6 +2,21 @@ from database.connection import fetch_one, fetch_all
 from database import queries
 
 
+TIPOS_VALORIZACION = {
+    "todos": ("vbruto_sis_num", "Valorización total"),
+    "servicios": ("vbruto_ser_sis_num", "Servicios"),
+    "medicamentos": ("vbruto_med_sis_num", "Medicamentos"),
+    "insumos": ("vbruto_ins_sis_num", "Insumos"),
+    "procedimientos": ("vbruto_pro_sis_num", "Procedimientos"),
+}
+
+GRANULARIDADES = {
+    "dia": ("TO_CHAR({fecha}, 'YYYY-MM-DD')", "DATE_TRUNC('day', {fecha})"),
+    "semana": ("TO_CHAR({fecha}, 'IYYY') || '-S' || TO_CHAR({fecha}, 'IW')", "DATE_TRUNC('week', {fecha})"),
+    "mes": ("TO_CHAR({fecha}, 'YYYY-MM')", "DATE_TRUNC('month', {fecha})"),
+}
+
+
 def _respuesta_vacia():
     return {
         "total_atenciones": 0,
@@ -112,12 +127,30 @@ def obtener_lista_servicios():
     return fetch_all(query)
 
 
+def obtener_lista_establecimientos():
+    query = """
+    SELECT DISTINCT
+        COALESCE(NULLIF(TRIM(codigo_eess), ''), 'SIN CODIGO') AS codigo_eess,
+        COALESCE(NULLIF(TRIM(nombre_eess), ''), 'NO ESPECIFICADO') AS nombre_eess,
+        COALESCE(NULLIF(TRIM(codigo_eess), ''), 'SIN CODIGO') || ' - ' ||
+        COALESCE(NULLIF(TRIM(nombre_eess), ''), 'NO ESPECIFICADO') AS establecimiento_label
+    FROM dw.fact_atenciones_2025
+    WHERE nombre_eess IS NOT NULL
+    ORDER BY nombre_eess;
+    """
+    return fetch_all(query) or []
+
+
 def obtener_atenciones_servicio_tiempo(
     servicio="TODOS",
+    establecimiento="TODOS",
     granularidad="mes",
     fecha_inicio=None,
     fecha_fin=None
 ):
+    if granularidad not in GRANULARIDADES:
+        raise ValueError("La agrupación debe ser día, semana o mes.")
+
     fecha_sql = "NULLIF(TRIM(fecha_atencion_date), '')::date"
 
     if granularidad == "dia":
@@ -135,11 +168,13 @@ def obtener_atenciones_servicio_tiempo(
     query = f"""
     SELECT
         {periodo_label} AS periodo,
-        COUNT(*) AS total_atenciones
+        COUNT(*) AS total_atenciones,
+        SUM(COUNT(*)) OVER () AS total_filtrado
     FROM dw.fact_atenciones_2025
     WHERE fecha_atencion_date IS NOT NULL
       AND TRIM(fecha_atencion_date) <> ''
       AND (%s = 'TODOS' OR TRIM(cod_servicio) = %s)
+      AND (%s = 'TODOS' OR TRIM(codigo_eess) = %s)
       AND (%s IS NULL OR {fecha_sql} >= %s::date)
       AND (%s IS NULL OR {fecha_sql} <= %s::date)
     GROUP BY periodo, {periodo_orden}
@@ -151,9 +186,47 @@ def obtener_atenciones_servicio_tiempo(
         (
             servicio,
             servicio,
+            establecimiento,
+            establecimiento,
             fecha_inicio,
             fecha_inicio,
             fecha_fin,
             fecha_fin
         )
     )
+
+
+def obtener_valorizacion_filtrada(
+    tipo_valorizacion="todos",
+    granularidad="mes",
+    fecha_inicio=None,
+    fecha_fin=None,
+):
+    if tipo_valorizacion not in TIPOS_VALORIZACION:
+        raise ValueError("El tipo de valorización no es válido.")
+    if granularidad not in GRANULARIDADES:
+        raise ValueError("La agrupación debe ser día, semana o mes.")
+
+    columna_valor, _ = TIPOS_VALORIZACION[tipo_valorizacion]
+    fecha_sql = "NULLIF(TRIM(fecha_atencion_date), '')::date"
+    periodo_label_tpl, periodo_orden_tpl = GRANULARIDADES[granularidad]
+    periodo_label = periodo_label_tpl.format(fecha=fecha_sql)
+    periodo_orden = periodo_orden_tpl.format(fecha=fecha_sql)
+
+    query = f"""
+    SELECT
+        {periodo_label} AS periodo,
+        COUNT(*) AS total_atenciones,
+        COUNT(*) FILTER (WHERE COALESCE({columna_valor}, 0) > 0) AS atenciones_valorizadas,
+        COALESCE(SUM({columna_valor}), 0) AS monto_valorizado,
+        COALESCE(AVG({columna_valor}) FILTER (WHERE {columna_valor} > 0), 0) AS promedio_valorizado
+    FROM dw.fact_atenciones_2025
+    WHERE fecha_atencion_date IS NOT NULL
+      AND TRIM(fecha_atencion_date) <> ''
+      AND (%s IS NULL OR {fecha_sql} >= %s::date)
+      AND (%s IS NULL OR {fecha_sql} <= %s::date)
+    GROUP BY periodo, {periodo_orden}
+    ORDER BY {periodo_orden};
+    """
+
+    return fetch_all(query, (fecha_inicio, fecha_inicio, fecha_fin, fecha_fin)) or []

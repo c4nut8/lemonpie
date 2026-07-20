@@ -164,11 +164,21 @@ def api_lista_servicios():
         return _error_response()
 
 
+@dashboard_bp.route("/api/lista-establecimientos")
+@login_required
+def api_lista_establecimientos():
+    try:
+        return jsonify(kpi_service.obtener_lista_establecimientos())
+    except Exception:
+        return _error_response()
+
+
 @dashboard_bp.route("/api/atenciones-servicio-tiempo")
 @login_required
 def api_atenciones_servicio_tiempo():
     try:
         servicio = request.args.get("servicio", "TODOS")
+        establecimiento = request.args.get("establecimiento", "TODOS")
         granularidad = request.args.get("granularidad", "mes")
         fecha_inicio = request.args.get("fecha_inicio")
         fecha_fin = request.args.get("fecha_fin")
@@ -181,6 +191,7 @@ def api_atenciones_servicio_tiempo():
 
         data = kpi_service.obtener_atenciones_servicio_tiempo(
             servicio=servicio,
+            establecimiento=establecimiento,
             granularidad=granularidad,
             fecha_inicio=fecha_inicio,
             fecha_fin=fecha_fin
@@ -197,6 +208,7 @@ def exportar_atenciones_excel():
 
     try:
         servicio = request.args.get("servicio", "TODOS")
+        establecimiento = request.args.get("establecimiento", "TODOS")
         granularidad = request.args.get("granularidad", "mes")
         fecha_inicio = request.args.get("fecha_inicio")
         fecha_fin = request.args.get("fecha_fin")
@@ -204,6 +216,7 @@ def exportar_atenciones_excel():
 
         data = kpi_service.obtener_atenciones_servicio_tiempo(
             servicio=servicio,
+            establecimiento=establecimiento,
             granularidad=granularidad,
             fecha_inicio=fecha_inicio,
             fecha_fin=fecha_fin
@@ -234,6 +247,18 @@ def exportar_atenciones_excel():
             if servicio_info:
                 codigo_servicio = servicio_info["cod_servicio"]
                 nombre_servicio = servicio_info["descripcion_servicio"]
+
+        codigo_establecimiento = "TODOS"
+        nombre_establecimiento = "Todos los establecimientos"
+        if establecimiento != "TODOS":
+            establecimiento_info = next(
+                (item for item in kpi_service.obtener_lista_establecimientos()
+                 if str(item["codigo_eess"]).strip() == str(establecimiento).strip()),
+                None,
+            )
+            if establecimiento_info:
+                codigo_establecimiento = establecimiento_info["codigo_eess"]
+                nombre_establecimiento = establecimiento_info["nombre_eess"]
 
 
 
@@ -276,6 +301,12 @@ def exportar_atenciones_excel():
 
         ws["A4"] = "Servicio"
         ws["B4"] = nombre_servicio
+        ws["C3"] = "Código establecimiento"
+        ws["D3"] = codigo_establecimiento
+        ws["C4"] = "Establecimiento"
+        ws["D4"] = nombre_establecimiento
+        ws["C3"].font = Font(bold=True)
+        ws["C4"].font = Font(bold=True)
 
 
         ws["A5"] = "Agrupación"
@@ -383,7 +414,7 @@ def exportar_atenciones_excel():
 
 
         nombre_archivo = (
-            f"Reporte_{codigo_servicio}_{granularidad}.xlsx"
+            f"Reporte_{codigo_servicio}_{codigo_establecimiento}_{granularidad}.xlsx"
         )
 
 
@@ -399,4 +430,102 @@ def exportar_atenciones_excel():
 
     except Exception:
 
+        return _error_response()
+
+
+def _parametros_valorizacion():
+    tipo = request.args.get("tipo", "todos").strip().lower()
+    granularidad = request.args.get("granularidad", "mes").strip().lower()
+    fecha_inicio = request.args.get("fecha_inicio") or None
+    fecha_fin = request.args.get("fecha_fin") or None
+
+    for valor, nombre in ((fecha_inicio, "fecha de inicio"), (fecha_fin, "fecha final")):
+        if valor:
+            try:
+                datetime.strptime(valor, "%Y-%m-%d")
+            except ValueError as exc:
+                raise ValueError(f"La {nombre} no es válida.") from exc
+    if fecha_inicio and fecha_fin and fecha_inicio > fecha_fin:
+        raise ValueError("La fecha de inicio no puede ser posterior a la fecha final.")
+    return tipo, granularidad, fecha_inicio, fecha_fin
+
+
+@dashboard_bp.route("/api/valorizacion-filtrada")
+@login_required
+def api_valorizacion_filtrada():
+    try:
+        tipo, granularidad, fecha_inicio, fecha_fin = _parametros_valorizacion()
+        data = kpi_service.obtener_valorizacion_filtrada(
+            tipo, granularidad, fecha_inicio, fecha_fin
+        )
+        return jsonify(data)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception:
+        return _error_response()
+
+
+@dashboard_bp.route("/api/exportar-valorizacion-excel")
+@login_required
+def exportar_valorizacion_excel():
+    try:
+        tipo, granularidad, fecha_inicio, fecha_fin = _parametros_valorizacion()
+        data = kpi_service.obtener_valorizacion_filtrada(
+            tipo, granularidad, fecha_inicio, fecha_fin
+        )
+        _, tipo_label = kpi_service.TIPOS_VALORIZACION[tipo]
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Valorización"
+        ws.merge_cells("A1:E1")
+        ws["A1"] = "Reporte de valorización SIS"
+        ws["A1"].font = Font(bold=True, size=14, color="FFFFFF")
+        ws["A1"].fill = PatternFill("solid", fgColor="17365D")
+
+        filtros = [
+            ("Tipo de valorización", tipo_label),
+            ("Agrupación", granularidad.capitalize()),
+            ("Fecha inicio", fecha_inicio or "Sin filtro"),
+            ("Fecha fin", fecha_fin or "Sin filtro"),
+            ("Fecha de consulta", datetime.now(ZoneInfo("America/Lima")).strftime("%d/%m/%Y %H:%M")),
+        ]
+        for fila, (etiqueta, valor) in enumerate(filtros, start=3):
+            ws.cell(fila, 1, etiqueta).font = Font(bold=True)
+            ws.cell(fila, 2, valor)
+
+        encabezados = ["Periodo", "Atenciones", "Atenciones valorizadas", "Monto valorizado", "Promedio valorizado"]
+        for columna, encabezado in enumerate(encabezados, start=1):
+            celda = ws.cell(10, columna, encabezado)
+            celda.font = Font(bold=True, color="FFFFFF")
+            celda.fill = PatternFill("solid", fgColor="5E86B5")
+            celda.alignment = Alignment(horizontal="center")
+
+        for fila, item in enumerate(data, start=11):
+            periodo = item.get("periodo", "")
+            if isinstance(periodo, str) and re.match(r"^[=+\-@]", periodo):
+                periodo = f"'{periodo}"
+            valores = [periodo, item.get("total_atenciones", 0), item.get("atenciones_valorizadas", 0), item.get("monto_valorizado", 0), item.get("promedio_valorizado", 0)]
+            for columna, valor in enumerate(valores, start=1):
+                ws.cell(fila, columna, valor)
+            ws.cell(fila, 4).number_format = '"S/ "#,##0.00'
+            ws.cell(fila, 5).number_format = '"S/ "#,##0.00'
+
+        for columna, ancho in zip("ABCDE", (18, 18, 24, 22, 22)):
+            ws.column_dimensions[columna].width = ancho
+        ws.freeze_panes = "A11"
+        ws.auto_filter.ref = f"A10:E{max(10, 10 + len(data))}"
+
+        archivo = BytesIO()
+        wb.save(archivo)
+        archivo.seek(0)
+        return send_file(
+            archivo,
+            as_attachment=True,
+            download_name=f"Valorizacion_{tipo}_{granularidad}.xlsx",
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception:
         return _error_response()

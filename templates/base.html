@@ -11,6 +11,8 @@
     <!-- Tabler Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_hospital.png') }}" type="image/png">
+
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
@@ -25,15 +27,19 @@
     <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
 
-            <h1 class="navbar-brand navbar-brand-autodark">
-                <span class="fw-bold">BI - SIS</span>
-            </h1>
-            <div class="text-white-50 small text-center mb-3">
-                Hospital SJDD Pisco
-            </div>
+            <a class="navbar-brand navbar-brand-autodark d-flex align-items-center gap-3" href="{{ url_for('dashboard.dashboard') }}">
+                <div class="sidebar-brand-logo">
+                    <img src="{{ url_for('static', filename='img/logo_hospital.png') }}" alt="Logo Hospital" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <span class="sidebar-brand-title">BI - SIS</span>
+                    <div class="sidebar-brand-subtitle">Hospital SJDD Pisco</div>
+                </div>
+            </a>
             {% if current_user.is_authenticated %}
-            <div class="text-white-50 small text-center mb-3">
-                Usuario: {{ current_user.username }} | Rol: {{ current_user.rol }}
+            <div class="sidebar-user-panel text-white-75 small mb-3">
+                Usuario: {{ current_user.username }}<br>
+                Rol: {{ current_user.rol }}
             </div>
             {% endif %}
 
@@ -41,35 +47,35 @@
                 <ul class="navbar-nav pt-lg-3">
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">
+                        <a class="nav-link {% if request.path == '/' or request.path == url_for('dashboard.dashboard') %}active{% endif %}" href="{{ url_for('dashboard.dashboard') }}">
                             <span class="nav-link-icon"><i class="ti ti-dashboard"></i></span>
                             <span class="nav-link-title">Resumen</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard.atenciones') }}">
+                        <a class="nav-link {% if request.path == url_for('dashboard.atenciones') %}active{% endif %}" href="{{ url_for('dashboard.atenciones') }}">
                             <span class="nav-link-icon"><i class="ti ti-activity"></i></span>
                             <span class="nav-link-title">Atenciones</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard.valorizacion') }}">
+                        <a class="nav-link {% if request.path == url_for('dashboard.valorizacion') %}active{% endif %}" href="{{ url_for('dashboard.valorizacion') }}">
                             <span class="nav-link-icon"><i class="ti ti-cash"></i></span>
                             <span class="nav-link-title">Valorización SIS</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard.calidad') }}">
+                        <a class="nav-link {% if request.path == url_for('dashboard.calidad') %}active{% endif %}" href="{{ url_for('dashboard.calidad') }}">
                             <span class="nav-link-icon"><i class="ti ti-shield-check"></i></span>
                             <span class="nav-link-title">Calidad de datos</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard.etl') }}">
+                        <a class="nav-link {% if request.path == url_for('dashboard.etl') %}active{% endif %}" href="{{ url_for('dashboard.etl') }}">
                             <span class="nav-link-icon"><i class="ti ti-database-import"></i></span>
                             <span class="nav-link-title">ETL</span>
                         </a>
@@ -96,10 +102,13 @@
 
         <header class="navbar navbar-expand-md navbar-light bg-white d-print-none border-bottom">
             <div class="container-xl">
-                <div>
-                    <h2 class="navbar-brand mb-0">Dashboard BI - SIS 2025</h2>
-                    <div class="text-muted small">
-                        Hospital San Juan de Dios de Pisco - Área SIS
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ url_for('static', filename='img/logo_hospital.png') }}" alt="Logo hospital" class="header-logo" onerror="this.style.display='none'">
+                    <div>
+                        <h2 class="navbar-brand mb-0">Dashboard BI - SIS 2025</h2>
+                        <div class="text-muted small">
+                            Hospital San Juan de Dios de Pisco - Área SIS
+                        </div>
                     </div>
                 </div>
             </div>

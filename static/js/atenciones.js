@@ -184,6 +184,7 @@ async function cargarTablaServicios() {
 }
 
 let serviciosDisponibles = [];
+let establecimientosDisponibles = [];
 let graficoServicioTiempo = null;
 
 async function cargarListaServicios() {
@@ -238,16 +239,105 @@ function obtenerServicioSeleccionado() {
         };
     }
 
-    inputHidden.value = "TODOS";
+    throw new Error("Selecciona un servicio válido de la lista o usa “Todos los servicios”.");
+}
 
-    return {
-        codigo: "TODOS",
-        texto: "Todos los servicios"
-    };
+async function cargarListaEstablecimientos() {
+    establecimientosDisponibles = await obtenerDatos("/api/lista-establecimientos");
+    const datalist = document.getElementById("listaEstablecimientos");
+    datalist.innerHTML = "";
+    establecimientosDisponibles.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.establecimiento_label;
+        datalist.appendChild(option);
+    });
+}
+
+function obtenerEstablecimientoSeleccionado() {
+    const texto = document.getElementById("buscadorEstablecimiento").value.trim().toLowerCase();
+    const inputHidden = document.getElementById("filtroEstablecimiento");
+    if (!texto || texto === "todos" || texto === "todos los establecimientos") {
+        inputHidden.value = "TODOS";
+        return { codigo: "TODOS", texto: "Todos los establecimientos" };
+    }
+    const encontrado = establecimientosDisponibles.find(item => {
+        const codigo = String(item.codigo_eess || "").toLowerCase();
+        const nombre = String(item.nombre_eess || "").toLowerCase();
+        const label = String(item.establecimiento_label || "").toLowerCase();
+        return label === texto || codigo === texto || nombre === texto || label.includes(texto);
+    });
+    if (!encontrado) throw new Error("Selecciona un establecimiento válido de la lista o deja el campo vacío.");
+    inputHidden.value = encontrado.codigo_eess;
+    return { codigo: encontrado.codigo_eess, texto: encontrado.establecimiento_label };
+}
+
+function validarFechasAtenciones() {
+    const inicio = document.getElementById("fechaInicio").value;
+    const fin = document.getElementById("fechaFin").value;
+    if (inicio && fin && inicio > fin) {
+        throw new Error("La fecha de inicio no puede ser posterior a la fecha final.");
+    }
+}
+
+function actualizarResumenAtenciones(data, servicioTexto, establecimientoTexto, granularidad) {
+    const sumaPeriodos = data.reduce((suma, item) => suma + Number(item.total_atenciones || 0), 0);
+    const total = data.length ? Number(data[0].total_filtrado ?? sumaPeriodos) : 0;
+    const maximo = data.reduce((mayor, item) => Number(item.total_atenciones || 0) > Number(mayor.total_atenciones || 0) ? item : mayor, {});
+    const promedio = data.length ? total / data.length : 0;
+    const etiquetas = { mes: "Mensual", semana: "Semanal", dia: "Diaria" };
+
+    document.getElementById("totalAtencionesFiltradas").textContent = formatoNumero(total);
+    document.getElementById("totalPeriodosFiltrados").textContent = formatoNumero(data.length);
+    document.getElementById("promedioAtencionesFiltradas").textContent = formatoNumero(Math.round(promedio));
+    document.getElementById("maximoAtencionesFiltradas").textContent = formatoNumero(maximo.total_atenciones || 0);
+    document.getElementById("periodoMaximoAtenciones").textContent = maximo.periodo ? `Periodo ${maximo.periodo}` : "Sin datos";
+    document.getElementById("resumenFiltroAtenciones").textContent = `${servicioTexto} · ${establecimientoTexto} · ${etiquetas[granularidad]}`;
+    document.getElementById("cantidadResultadosAtenciones").textContent = `${data.length} ${data.length === 1 ? "periodo" : "periodos"}`;
+
+    const tbody = document.getElementById("tablaAtencionesFiltradas");
+    tbody.innerHTML = "";
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay datos para los filtros seleccionados.</td></tr>';
+    }
+    data.forEach(item => {
+        const row = document.createElement("tr");
+        const participacion = total ? `${(Number(item.total_atenciones || 0) * 100 / total).toLocaleString("es-PE", { maximumFractionDigits: 1 })}%` : "0%";
+        [item.periodo, formatoNumero(item.total_atenciones), participacion].forEach((valor, index) => {
+            const cell = document.createElement("td");
+            if (index > 0) cell.className = "text-end";
+            cell.textContent = valor;
+            row.appendChild(cell);
+        });
+        tbody.appendChild(row);
+    });
+    document.getElementById("totalTablaAtenciones").innerHTML = data.length ? `<tr class="fw-bold"><td>Total</td><td class="text-end">${formatoNumero(total)}</td><td class="text-end">100%</td></tr>` : "";
+}
+
+function establecerEstadoFiltro(mensaje, tipo = "normal") {
+    const estado = document.getElementById("estadoFiltroAtenciones");
+    estado.textContent = mensaje;
+    estado.className = tipo === "error" ? "small text-danger" : tipo === "cargando" ? "small text-primary" : "small text-muted";
+}
+
+function configurarBuscador(idVisible, idOculto) {
+    const input = document.getElementById(idVisible);
+    input.addEventListener("focus", () => input.select());
+    input.addEventListener("input", () => {
+        if (!input.value.trim()) document.getElementById(idOculto).value = "TODOS";
+    });
+    input.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            input.value = "";
+            document.getElementById(idOculto).value = "TODOS";
+            input.blur();
+        }
+    });
 }
 
 async function crearGraficoServicioTiempo() {
+    validarFechasAtenciones();
     const servicioSeleccionado = obtenerServicioSeleccionado();
+    const establecimientoSeleccionado = obtenerEstablecimientoSeleccionado();
 
     const servicio = servicioSeleccionado.codigo;
     const servicioTexto = servicioSeleccionado.texto;
@@ -259,6 +349,7 @@ async function crearGraficoServicioTiempo() {
     const params = new URLSearchParams();
 
     params.append("servicio", servicio);
+    params.append("establecimiento", establecimientoSeleccionado.codigo);
     params.append("granularidad", granularidad);
 
     if (fechaInicio) {
@@ -271,11 +362,7 @@ async function crearGraficoServicioTiempo() {
 
     const url = `/api/atenciones-servicio-tiempo?${params.toString()}`;
 
-    console.log("URL filtro:", url);
-
     const data = await obtenerDatos(url);
-
-    console.log("Datos recibidos:", data);
 
     const ctx = document.getElementById("chartServicioTiempo");
 
@@ -314,11 +401,23 @@ async function crearGraficoServicioTiempo() {
             }
         }
     });
+
+    actualizarResumenAtenciones(data, servicioTexto, establecimientoSeleccionado.texto, granularidad);
+    establecerEstadoFiltro(`Consulta actualizada: ${data.length} ${data.length === 1 ? "periodo" : "periodos"}.`);
 }
 
 function descargarExcel(){
-
-    const servicioSeleccionado = obtenerServicioSeleccionado();
+    let servicioSeleccionado;
+    let establecimientoSeleccionado;
+    try {
+        validarFechasAtenciones();
+        servicioSeleccionado = obtenerServicioSeleccionado();
+        establecimientoSeleccionado = obtenerEstablecimientoSeleccionado();
+    } catch (error) {
+        establecerEstadoFiltro(error.message, "error");
+        alert(error.message);
+        return;
+    }
 
     const params = new URLSearchParams();
 
@@ -326,6 +425,7 @@ function descargarExcel(){
         "servicio",
         servicioSeleccionado.codigo
     );
+    params.append("establecimiento", establecimientoSeleccionado.codigo);
 
     params.append(
         "granularidad",
@@ -355,12 +455,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         document.getElementById("fechaInicio").value = "2025-01-01";
         document.getElementById("fechaFin").value = "2025-12-31";
+        configurarBuscador("buscadorServicio", "filtroServicio");
+        configurarBuscador("buscadorEstablecimiento", "filtroEstablecimiento");
 
-        await cargarListaServicios();
+        await Promise.all([cargarListaServicios(), cargarListaEstablecimientos()]);
         await crearGraficoServicioTiempo();
 
-        document.getElementById("btnAplicarFiltros").addEventListener("click", async () => {
-            await crearGraficoServicioTiempo();
+        document.getElementById("btnAplicarFiltros").addEventListener("click", async event => {
+            const boton = event.currentTarget;
+            boton.disabled = true;
+            establecerEstadoFiltro("Consultando datos…", "cargando");
+            try {
+                await crearGraficoServicioTiempo();
+            } catch (error) {
+                establecerEstadoFiltro(error.message, "error");
+                alert(error.message);
+            } finally {
+                boton.disabled = false;
+            }
+        });
+
+        document.getElementById("btnLimpiarFiltros").addEventListener("click", async () => {
+            document.getElementById("buscadorServicio").value = "";
+            document.getElementById("filtroServicio").value = "TODOS";
+            document.getElementById("buscadorEstablecimiento").value = "";
+            document.getElementById("filtroEstablecimiento").value = "TODOS";
+            document.getElementById("filtroGranularidad").value = "mes";
+            document.getElementById("fechaInicio").value = "2025-01-01";
+            document.getElementById("fechaFin").value = "2025-12-31";
+            establecerEstadoFiltro("Restableciendo consulta…", "cargando");
+            try { await crearGraficoServicioTiempo(); } catch (error) { establecerEstadoFiltro(error.message, "error"); }
         });
 
         document.getElementById("btnDescargarExcel")
