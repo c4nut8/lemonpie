@@ -9,70 +9,44 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
-<body class="d-flex flex-column">
-<div class="page page-center">
-
-    <div class="container py-4">
-
-        <div class="text-center mb-4 login-brand">
-            <img src="{{ url_for('static', filename='img/logo_hospital.png') }}" alt="Logotipo hospital" onerror="this.style.display='none'">
-            <h1>BI - SIS 2025</h1>
-            <p class="text-muted">Hospital San Juan de Dios de Pisco</p>
+<body class="login-page">
+<main class="login-screen">
+    <section class="login-panel" aria-labelledby="login-title">
+        <div class="login-panel-brand">
+            <img src="{{ url_for('static', filename='img/logo_hospital.jpg') }}" alt="Logo Hospital San Juan de Dios de Pisco">
+            <h1 id="login-title">BI - SIS 2025</h1>
+            <p class="login-hospital-name">Hospital San Juan de Dios de Pisco</p>
+            <p class="login-access-note">Acceso restringido a personal autorizado</p>
         </div>
 
-        <div class="card card-md login-card">
-            <form method="post" action="{{ url_for('auth.login') }}" class="row g-0 align-items-stretch">
-                <div class="col-12 col-lg-6 login-visual position-relative">
-                    <img src="{{ url_for('static', filename='img/hospital_login.jpg') }}" alt="Hospital" onerror="this.style.display='none'; this.closest('.login-visual').classList.add('no-image');">
-                    <div class="login-image-overlay">
-                        <img src="{{ url_for('static', filename='img/logo_hospital.png') }}" alt="Logo Hospital" onerror="this.style.display='none'">
-                        <div>
-                            <h2>Panel institucional</h2>
-                            <p>Accede a tus indicadores con seguridad y claridad.</p>
-                        </div>
+        <form method="post" action="{{ url_for('auth.login') }}" autocomplete="off" class="login-form">
+            <h2>Acceso al sistema</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="login-alerts" aria-live="polite">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+                        {% endfor %}
                     </div>
-                </div>
-                <div class="col-12 col-lg-6 d-flex">
-                    <div class="card-body login-body w-100 d-flex flex-column justify-content-center">
-                        <h2 class="card-title text-center mb-4">Acceso al sistema</h2>
+                {% endif %}
+            {% endwith %}
 
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+            <div class="login-field">
+                <label class="form-label" for="username">Usuario</label>
+                <input id="username" autocomplete="username" type="text" name="username" class="form-control" placeholder="Ingrese su usuario" required autofocus>
+            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Usuario</label>
-                        <input autocomplete="username" type="text" name="username" class="form-control" placeholder="Ingrese su usuario" required>
-                    </div>
+            <div class="login-field">
+                <label class="form-label" for="password">Contraseña</label>
+                <input id="password" autocomplete="current-password" type="password" name="password" class="form-control" placeholder="Ingrese su contraseña" required>
+            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Contraseña</label>
-                        <input autocomplete="current-password" type="password" name="password" class="form-control" placeholder="Ingrese su contraseña" required>
-                    </div>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                    <div class="form-footer">
-                        <button type="submit" class="btn btn-primary w-100">
-                            Iniciar sesión
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="text-center text-muted mt-3">
-            Acceso restringido a personal autorizado.
-        </div>
-
-    </div>
-
-</div>
+            <button type="submit" class="btn btn-primary login-submit">Iniciar sesión</button>
+        </form>
+    </section>
+</main>
 </body>
 </html>

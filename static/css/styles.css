@@ -332,9 +332,11 @@ img {
 }
 
 .login-brand img {
-    width: 72px;
+    width: min(220px, 70vw);
+    height: 92px;
     margin: 0 auto 1rem;
     object-fit: contain;
+    mix-blend-mode: multiply;
 }
 
 .login-brand h1 {
@@ -509,6 +511,174 @@ img {
     .navbar-vertical .nav-link {
         margin: 4px 8px;
         padding: 10px 14px;
+    }
+}
+
+/* Login institucional a pantalla completa */
+body.login-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    overflow-x: hidden;
+    color: #1d2b3a;
+    background:
+        linear-gradient(135deg, rgba(9, 31, 58, 0.82), rgba(20, 67, 111, 0.58)),
+        url("../img/hospital_login.jfif") center / cover no-repeat fixed;
+}
+
+.login-screen {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: clamp(1rem, 4vw, 3rem);
+}
+
+.login-screen::before {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    content: "";
+    background: radial-gradient(circle at 50% 42%, transparent 0%, rgba(4, 19, 37, 0.18) 100%);
+    pointer-events: none;
+}
+
+.login-panel {
+    width: min(100%, 450px);
+    padding: clamp(1.65rem, 4vw, 2.5rem);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 24px 70px rgba(5, 25, 48, 0.34);
+    backdrop-filter: blur(8px);
+}
+
+.login-panel-brand {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.login-panel-brand img {
+    display: block;
+    width: min(245px, 78%);
+    height: 105px;
+    margin: 0 auto 1rem;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+}
+
+.login-panel-brand h1 {
+    margin: 0;
+    color: #102d54;
+    font-size: clamp(1.65rem, 5vw, 2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    white-space: nowrap;
+}
+
+.login-hospital-name {
+    margin: 0.45rem 0 0;
+    color: #40566e;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.login-access-note {
+    margin: 0.35rem 0 0;
+    color: #6b7d90;
+    font-size: 0.8rem;
+}
+
+.login-form {
+    padding-top: 1.35rem;
+    border-top: 1px solid #e3e9f0;
+}
+
+.login-form h2 {
+    margin: 0 0 1.25rem;
+    color: #17365d;
+    font-size: 1.15rem;
+    font-weight: 750;
+    text-align: center;
+}
+
+.login-field {
+    margin-bottom: 1rem;
+}
+
+.login-field .form-label {
+    margin-bottom: 0.45rem;
+    color: #263d56;
+    font-weight: 650;
+}
+
+.login-field .form-control {
+    width: 100%;
+    min-height: 48px;
+    padding-inline: 0.95rem;
+    border-color: #ccd7e3;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.login-field .form-control:focus {
+    border-color: #356a9e;
+    box-shadow: 0 0 0 3px rgba(53, 106, 158, 0.16);
+}
+
+.login-submit {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 0.35rem;
+    border-radius: 10px;
+    background: #17365d;
+    border-color: #17365d;
+    font-weight: 700;
+}
+
+.login-submit:hover,
+.login-submit:focus {
+    background: #244f7d;
+    border-color: #244f7d;
+}
+
+.login-alerts .alert {
+    margin-bottom: 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 575px) {
+    body.login-page {
+        background-attachment: scroll;
+    }
+
+    .login-screen {
+        padding: 1rem;
+    }
+
+    .login-panel {
+        padding: 1.4rem 1.2rem;
+        border-radius: 18px;
+    }
+
+    .login-panel-brand img {
+        width: min(205px, 72%);
+        height: 82px;
+        margin-bottom: 0.8rem;
+    }
+
+    .login-panel-brand h1 {
+        font-size: 1.55rem;
+    }
+
+    .login-hospital-name {
+        font-size: 0.88rem;
     }
 }
 
